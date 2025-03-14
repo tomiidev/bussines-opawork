@@ -5,26 +5,16 @@ import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
-import Calendar from './pages/Calendar';
-import Chart from './pages/Chart';
-import ECommerce from './pages/Dashboard/ECommerce';
-import FormElements from './pages/Form/FormElements';
-import FormLayout from './pages/Form/FormLayout';
+import { API_LOCAL, API_URL } from './hooks/apis';
+import AuthLayout from './layout/auth';
+import DefaultLayout from './layout/DefaultLayout';
+import CardList from './pages/Dashboard/ECommerce';
+import JobDetail from './pages/job_id';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import CreateAdvise from './pages/create_advise';
 import Tables from './pages/Tables';
-import Alerts from './pages/UiElements/Alerts';
-import Buttons from './pages/UiElements/Buttons';
-import DefaultLayout from './layout/DefaultLayout'; // Este es el layout de las páginas protegidas
-import Resources from './pages/resources';
-import VistaPaciente from './pages/patient';
-import VistaSession from './pages/patient_id';
-import AuthLayout from './layout/auth'; // Layout para autenticación
-import { API_LOCAL, API_URL } from './hooks/apis';
-import ListaEspera from './pages/wait_list';
-import PsychologistProfile from './pages/landing/landing';
-import Billing from './pages/billing';
-import VistaSesion from './pages/patient_id';
+import ListaPacientes from './components/Tables/TableThree';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -43,45 +33,14 @@ function App() {
 
   const checkedAuth = useRef(false);
 
-  /*   useEffect(() => {
-      if (checkedAuth.current) return; // Evita múltiples llamadas
-      checkedAuth.current = true;
-  
-      const checkAuth = async () => {
-        try {
-          const response = await fetch(`${API_LOCAL}/check-auth`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            mode: "cors",
-            credentials: 'include',
-          });
-  
-          if (response.ok) {
-            setIsAuthenticated(true);
-          } else {
-            setIsAuthenticated(false);
-  
-            // Si el usuario ya está en una página de autenticación, no lo redirijas
-            if (!pathname.startsWith('/auth')) {
-              navigate('/auth/signin', { replace: true });
-            }
-          }
-        } catch (error) {
-          console.error("Error verificando autenticación:", error);
-          setIsAuthenticated(false);
-        }
-      };
-  
-      checkAuth();
-    }, [navigate, pathname]);
-   */
+
   useEffect(() => {
     if (checkedAuth.current) return; // Evita múltiples llamadas
     checkedAuth.current = true;
 
     const checkAuth = async () => {
       try {
-        const response = await fetch(`${API_URL}/check-auth`, {
+        const response = await fetch(`${API_LOCAL}/check-auth`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           mode: "cors",
@@ -90,7 +49,7 @@ function App() {
 
         const data = await response.json(); // Verifica la respuesta correctamente
 
-        if (response.ok && data.authenticated && data.freePlan ===true) { // Validar que el usuario esté autenticado
+        if (response.ok && data.authenticated && data.freePlan === true) { // Validar que el usuario esté autenticado
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
@@ -144,7 +103,7 @@ function App() {
                 </>
               }
             />
-            <Route
+            {/*      <Route
               path="/p"
               element={
                 <>
@@ -152,7 +111,7 @@ function App() {
                   <PsychologistProfile />
                 </>
               }
-            />
+            /> */}
           </Route>
         </Routes>
       ) : (
@@ -165,11 +124,44 @@ function App() {
               index
               element={
                 <>
-                  <PageTitle title="Contygo | Inicio" />
-                  <ECommerce />
+                  <PageTitle title="Avisos | MiChamba" />
+                  <CardList />
                 </>
               }
             />
+            <Route
+              index
+              path='/avisos/:id'
+              element={
+                <>
+                  <PageTitle title="Detalle | MiChamba" />
+                  <JobDetail />
+                </>
+              }
+            />
+            <Route
+              path="/perfil"
+              element={
+                <>
+                  <PageTitle title="Perfil | MiChamba" />
+                  <Settings />
+                </>
+              }
+            />
+            <Route
+              path="/crearaviso"
+              element={
+                <>
+                  <PageTitle title="Crear aviso | MiChamba" />
+                  <CreateAdvise />
+                </>
+              }
+            />
+            <Route path="/postulaciones" element={<>
+              <PageTitle title="Contygo | Pacientes" />
+              <ListaPacientes />
+            </>} />
+            {/*
             <Route
               path="/calendar"
               element={
@@ -214,8 +206,8 @@ function App() {
                   <FormElements />
                 </>
               }
-            />
-         {/*    <Route
+            /> */}
+            {/*    <Route
               path="/forms/form-layout"
               element={
                 <>
@@ -224,7 +216,7 @@ function App() {
                 </>
               }
             /> */}
-            <Route path="/waitlist" element={<>
+            {/*   <Route path="/waitlist" element={<>
               <PageTitle title="Contygo | Lista de espera" />
               <ListaEspera />
             </>} />
@@ -275,7 +267,7 @@ function App() {
                   <Buttons />
                 </>
               }
-            />
+            /> */}
           </Routes>
         </DefaultLayout>
       )}

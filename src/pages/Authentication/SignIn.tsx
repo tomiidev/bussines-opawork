@@ -45,7 +45,7 @@ const SignIn: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/sign_in_with_email`, {
+      const response = await fetch(`${API_LOCAL}/sign_in_with_email`, {
         method: 'POST',
         mode: "cors",
         credentials: 'include', // Enviar cookies HTTP-only automáticamente
@@ -68,9 +68,10 @@ const SignIn: React.FC = () => {
 
       // Redirige al usuario a la página de inicio o dashboard
 
-     /*  navigate('/') */
+       /* navigate('/')  */
+       window.location.replace("https://negocios.opawork.app") 
           /* window.location.replace("http://localhost:5173")  */
-          window.location.replace("https://www.contygoo.com") 
+         /*  window.location.replace("https://www.contygoo.com")  */
       /*  window.location.href = "http://localhost:5173"; */
     } catch (err) {
       setLoading(false);
@@ -86,7 +87,7 @@ const SignIn: React.FC = () => {
           <ImagenSvg />
           <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-              <span className="mb-1.5 block font-medium">¡7 días gratis!</span>
+              <span className="mb-1.5 block font-medium">¡Conecta con el mejor talento!</span>
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Inicia sesión
               </h2>

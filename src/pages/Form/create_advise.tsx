@@ -101,7 +101,7 @@ const departments = {
   Durazno: ["Durazno", "Sarandí del Yí"]
 };
 
-const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
+const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
   const [formData, setFormData] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -263,43 +263,32 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
       <div className="rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
         <div className="p-7">
           <form onSubmit={handleSubmit}>
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Nombre</label>
+            <div className="">
+              <label className="block text-sm font-medium py-3">Título</label>
               <input
                 className="w-full rounded border border-stroke py-3 px-4"
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Tu nombre"
+                placeholder="Título"
               />
             </div>
-
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Teléfono</label>
-              <input
+            <div className="">
+              <label className="block text-sm font-medium py-3">¿Qué necesitas?</label>
+              <textarea
                 className="w-full rounded border border-stroke py-3 px-4"
-                type="text"
-                name="phone"
-                value={formData.phone}
+                name="description"
+                rows={4}
+                minLength={50}
+                maxLength={300}
+                value={formData.description}
                 onChange={handleChange}
-                placeholder="Teléfono"
-              />
+                placeholder="Descripción del proyecto"
+              ></textarea>
             </div>
 
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Email</label>
-              <input
-                className="w-full rounded border border-stroke py-3 px-4"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-
-              />
-            </div>
-            <div className="mb-5.5">
+            <div className="">
               <label className="block text-sm font-medium py-3">Idiomas</label>
               <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
                 {languages.map((especialidad) => {
@@ -338,59 +327,11 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
                   );
                 })}
               </div>
-              {/* <div className="mt-3 flex flex-wrap gap-2 py-3">
-                {formData?.especialities.map((type) => (
-                  <span
-                    key={type}
-                    className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm flex items-center gap-2"
-                  >
-                    {type}
-                    <button
-                  type="button"
-                  onClick={() => toggleEspecialidad(type)}
-                  className="text-gray-800 hover:text-white"
-                >
-                  ×
-                </button>
-                  </span>
-                ))}
-              </div> */}
+             
 
             </div>
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Dsiponibilidad</label>
-              <select
-                name="modality"
-                value={formData.modality}
-                onChange={handleChange}
-                className="w-full rounded border border-stroke py-3 px-4"
-              >
-                <option value="">Selecciona una modalidad</option>
-                <option value="online">Tiempo completo</option>
-                <option value="presencial">Medio tiempo</option>
-                <option value="ambas">Fines de semana</option>
-
-              </select>
-
-            </div>
-            {/* <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Modalidad de trabajo</label>
-              <select
-                name="modality"
-                value={formData.modality}
-                onChange={handleChange}
-                className="w-full rounded border border-stroke py-3 px-4"
-              >
-                <option value="">Selecciona una modalidad</option>
-                <option value="online">Remoto</option>
-                <option value="presencial">Presencial</option>
-                <option value="ambas">Ambas</option>
-
-              </select>
-
-            </div> */}
-            <div className="mb-5.5">
-              {/* <label className="block text-sm font-medium py-3">Sub especialidades</label>
+            <div className="">
+              <label className="block text-sm font-medium mb-3">Sub especialidades</label>
               <input
                 type="text"
                 placeholder="Escribí lo que hagas mejor y presioná Enter"
@@ -416,8 +357,9 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
                     </button>
                   </span>
                 ))}
-              </div> */}
-{/*               {
+              </div>
+
+              {/*               {
                 (formData.modality === "online" || formData.modality === "ambas") &&
                 <>
                   <div className="mb-5.5">
@@ -452,48 +394,41 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
                 </>
               } */}
             </div>
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Descripción</label>
-              <textarea
-                className="w-full rounded border border-stroke py-3 px-4"
-                name="description"
-                rows={4}
-                minLength={50}
-                maxLength={300}
-                value={formData.description}
+            <div className="">
+              <label className="block text-sm font-medium py-3">Dsiponibilidad</label>
+              <select
+                name="modality"
+                value={formData.modality}
                 onChange={handleChange}
-                placeholder="Escribe tu bio aquí"
-              ></textarea>
-            </div>
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Redes Sociales</label>
+                className="w-full rounded border border-stroke py-3 px-4"
+              >
+                <option value="">Selecciona una modalidad</option>
+                <option value="online">Tiempo completo</option>
+                <option value="presencial">Medio tiempo</option>
+                <option value="ambas">Fines de semana</option>
 
-              {Object.keys(formData.socialNetworks).map((social) => (
-                social !== "newNetwork" && (
-                  <div key={social} className="mb-3">
-                    {/*  <label className="block text-sm">{social.charAt(0).toUpperCase() + social.slice(1)}</label> */}
-                    <input
-                      className="w-full rounded border border-stroke py-3 px-4"
-                      type="text"
-                      name={social}
-                      value={formData.socialNetworks[social]}
-                      onChange={handleSocialNetworkChange}
-                      placeholder={`Enlace a ${social}`}
-                    />
-                    {/*  <button
-                      type="button"
-                      onClick={() => handleRemoveSocialNetwork(social)}
-                      className="text-red-500 mt-2"
-                    >
-                      Eliminar
-                    </button> */}
-                  </div>
-                )
-              ))}
-
+              </select>
 
             </div>
+            <div className="">
+              <label className="block text-sm font-medium py-3">Modalidad de trabajo</label>
+              <select
+                name="modality"
+                value={formData.modality}
+                onChange={handleChange}
+                className="w-full rounded border border-stroke py-3 px-4"
+              >
+                <option value="">Selecciona una modalidad</option>
+                <option value="online">Remoto</option>
+                <option value="presencial">Presencial</option>
+                <option value="ambas">Ambas</option>
+
+              </select>
+
+            </div>
+
             <PriceRangeSelector />
+
 
             <div className="flex justify-end">
               <button
@@ -501,7 +436,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
                 type="submit"
                 disabled={loading}
               >
-                {loading ? "Guardando..." : "Guardar"}
+                {loading ? "Publicando..." : "Publicar aviso"}
               </button>
             </div>
           </form>
@@ -511,4 +446,4 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
   );
 };
 
-export default UserProfileEditForm;
+export default CreateAdviseForm;

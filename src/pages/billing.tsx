@@ -7,9 +7,8 @@ import { BsDownload, BsShare } from "react-icons/bs";
 import { Link } from "react-router-dom";
 
 interface Buyer {
-  email: string
+  email: string ,
   name: string,
-  date: string
 }
 
 interface Payment {
@@ -17,7 +16,7 @@ interface Payment {
   _id?: string;
   patientId: string;
   name: string;
-  buyer: Buyer;
+  buyer: Buyer,
   descriptor: string;
   modality: string;
   sessions: string
@@ -38,7 +37,7 @@ interface Paciente {
   _id: string;
   name: string;
   age: number;
-  email: string
+  email: string,
   gender: 'masculino' | 'femenino';
   phone: string;
   message: string;
@@ -179,7 +178,7 @@ const Billing = () => {
     patientId: "", buyer: {
       email: "",
       name: "",
-      date: "",
+  
     }, name: "", sessions: "", descriptor: "", modality: "", date: Date.now(), path: "", price: ""
   });
 
@@ -190,24 +189,61 @@ const Billing = () => {
       patientId: "", name: "", buyer: {
         email: "",
         name: "",
-        date: "",
+      
       }, sessions: "", descriptor: "", modality: "", date: Date.now(), path: "", price: ""
     });
     setPaymentLink("")
     setOpen(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setPayment({ ...payment, [e.target.name]: e.target.value });
+  /*   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setPayment({ ...payment, [e.target.name]: e.target.value });
+    
+    };
+   */
+  /*    useEffect(() => {
+      if (selectedPatient?.email) {
+        setPayment(({
+          ...payment,
+          buyer: {
+            ...payment.buyer,
+            email: selectedPatient.email
+          }
+        }));
+      }
+    }, [selectedPatient]);  */
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+  
+      // Busca el paciente completo basado en el name
+      const foundPatient = patients.find(patient => patient.name === value);
+  
+      setPayment({
+          ...payment, // Mantiene todas las propiedades de payment
+          [name]: value, // Actualiza dinámicamente la propiedad correspondiente
+          ...(foundPatient && { 
+              buyer: { 
+                  ...payment.buyer, // Mantiene otras propiedades de buyer
+                  name: foundPatient.name,
+                  email: foundPatient.email
+              } 
+          })
+      });
+  
+      if (foundPatient) {
+          setSelectedPatient(foundPatient); // Guarda el objeto completo en selectedPatient
+      }
   };
+  
 
 
 
 
   const handleAddPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!payment.name || !payment.descriptor || !payment.sessions) {
+    console.log(payment)
+    if (!payment.descriptor || !payment.sessions) {
       alert("Todos los campos son obligatorios");
       return;
     }
@@ -218,7 +254,6 @@ const Billing = () => {
       patientId: payment.patientId,
       name: payment.name,
       buyer: payment.buyer,
-
       sessions: payment.sessions,
       descriptor: payment.descriptor,
       modality: payment.modality,
@@ -243,6 +278,7 @@ const Billing = () => {
       const formData = {
         _id: String(payment._id),
         id: String(payment.id),
+        email: String(payment.buyer.email),
         patientId: payment.patientId,
         patientName: payment.name,
         sessions: payment.sessions,
@@ -254,7 +290,7 @@ const Billing = () => {
       };
 
       console.log(payment)
-      const response = await fetch(`${API_URL}/upload-payment`, {
+      const response = await fetch(`${API_LOCAL}/upload-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ formData: formData }),
@@ -389,7 +425,7 @@ const Billing = () => {
 
                   </td>
                 </tr>
-              )): <p className="font-questrial">No hay pagos.</p>}
+              )) : <p className="font-questrial">No hay pagos.</p>}
             </tbody>
           </table>
         </div>
@@ -401,7 +437,7 @@ const Billing = () => {
             <h3 className="text-lg font-semibold mb-4">Crear link de pago</h3>
 
             <label className="block mb-2">Paciente</label>
-            <select name="patientName" value={selectedPatient?.name} onChange={handleChange} className="w-full p-2 mb-3 border border-gray-300 rounded-lg">
+            <select name="name" value={selectedPatient?.name} onChange={handleChange} className="w-full p-2 mb-3 border border-gray-300 rounded-lg">
               <option value="">Selecciona un paciente</option>
               {patients.map((type) => (
                 <option key={type._id} value={type.name}>

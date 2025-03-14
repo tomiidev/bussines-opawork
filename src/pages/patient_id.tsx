@@ -39,7 +39,7 @@ const VistaSesion: React.FC = () => {
     useEffect(() => {
         const obtenerSesion = async () => {
             try {
-                const response = await fetch(`${API_URL}/get-session-byid/${sessionId}`, {
+                const response = await fetch(`${API_LOCAL}/get-session-byid/${sessionId}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     mode: "cors",
@@ -87,7 +87,7 @@ const VistaSesion: React.FC = () => {
         e.preventDefault();
         console.log(notes)
         try {
-            const response = await fetch(`${API_URL}/insert-session-notes/${sessionId}`, {
+            const response = await fetch(`${API_LOCAL}/insert-session-notes/${sessionId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 mode: "cors",

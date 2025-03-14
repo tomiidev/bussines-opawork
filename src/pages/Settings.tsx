@@ -11,9 +11,11 @@ type User = {
   email: string;
   phone: string,
   description: string,
-  especiality: string,
+  especialities: string[],
   modality: string,
-  therapyTypes: string[];
+  subs: string[];
+  languages: string[];
+  socialNetworks?: { [key: string]: string }; // Redes sociales como objeto
 };
 
 
@@ -110,7 +112,8 @@ const Settings = () => {
   };
 
   return (
-    <div>
+    <div className="flex  min-h-screen">
+      <div className="container mx-auto   max-w-7xl text-center">
       <Breadcrumb pageName="Información personal" number={0} />
 
       <div className="grid gap-8">
@@ -118,7 +121,7 @@ const Settings = () => {
         <div className="col-span-5">
           <div className="rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke py-4 px-7 dark:border-strokedark">
-              <h3 className="font-medium text-black dark:text-white">Tu foto</h3>
+              <h3 className="font-medium text-black dark:text-white">Tu foto (Opcional - recomendado)</h3>
             </div>
             <div className="p-7">
               <form onSubmit={handleSubmit}>
@@ -206,6 +209,7 @@ const Settings = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
