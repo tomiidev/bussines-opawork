@@ -15,6 +15,7 @@ import Settings from './pages/Settings';
 import CreateAdvise from './pages/create_advise';
 import Tables from './pages/Tables';
 import ListaPacientes from './components/Tables/TableThree';
+import UserProfileApply from './pages/profileUserApply';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -135,7 +136,17 @@ function App() {
               element={
                 <>
                   <PageTitle title="Detalle | MiChamba" />
-                  <JobDetail />
+                  <CreateAdvise />
+                </>
+              }
+            />
+            <Route
+              index
+              path='/postulantes/:id/perfil'
+              element={
+                <>
+                  <PageTitle title="Detalle | MiChamba" />
+                  <UserProfileApply />
                 </>
               }
             />
@@ -157,7 +168,11 @@ function App() {
                 </>
               }
             />
-            <Route path="/postulaciones" element={<>
+            {/* <Route path="/avisos/postulaciones" element={<>
+              <PageTitle title="Contygo | Pacientes" />
+              <ListaPacientes />
+            </>} /> */}
+            <Route path="/postulantes/:id" element={<>
               <PageTitle title="Contygo | Pacientes" />
               <ListaPacientes />
             </>} />

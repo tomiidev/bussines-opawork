@@ -29,7 +29,7 @@ const Settings = () => {
 
     const getDataInformation = async () => {
       try {
-        const response = await axios.get(`${API_URL}/get-user-data`, { withCredentials: true });
+        const response = await axios.get(`${API_LOCAL}/get-user-data`, { withCredentials: true });
 
         if (response.status === 200) {
           const userData = response.data.data;

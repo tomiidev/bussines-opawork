@@ -1,40 +1,37 @@
-import React, { useState } from "react";
+import React from "react";
 
-const PriceRangeSelector = () => {
-  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({
-    min: 0,
-    max: 1000,
-  });
+type PriceRange = {
+  min: number;
+  max: number;
+};
 
-  // Función para manejar el cambio en el rango
+type PriceRangeSelectorProps = {
+  priceRange: PriceRange;
+  setPriceRange: React.Dispatch<React.SetStateAction<PriceRange>>;
+  formData: any;
+  setFormData: React.Dispatch<React.SetStateAction<any>>;
+};
+
+const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({ priceRange, setPriceRange, formData, setFormData }) => {
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const newValue = parseInt(value);
+    const newValue = parseInt(value, 10);
 
-    // Validar que el valor máximo no sea menor que el mínimo
-    if (name === "min" && newValue > priceRange.max) {
-      setPriceRange((prevRange) => ({
-        ...prevRange,
-        min: newValue,
-        max: newValue, // Si el mínimo es mayor que el máximo, actualizamos el máximo
-      }));
-    } else if (name === "max" && newValue < priceRange.min) {
-      setPriceRange((prevRange) => ({
-        ...prevRange,
-        max: newValue,
-        min: newValue, // Si el máximo es menor que el mínimo, actualizamos el mínimo
-      }));
-    } else {
-      setPriceRange((prevRange) => ({
-        ...prevRange,
-        [name]: newValue, // Si no hay conflicto, solo actualizamos el valor correspondiente
-      }));
-    }
+    setPriceRange((prevRange) => {
+      const updatedRange = { ...prevRange, [name]: newValue };
+      if (name === "min" && newValue > prevRange.max) {
+        updatedRange.max = newValue;
+      } else if (name === "max" && newValue < prevRange.min) {
+        updatedRange.min = newValue;
+      }
+      setFormData((prev: any) => ({ ...prev, priceRange: updatedRange }));
+      return updatedRange;
+    });
   };
+
   return (
     <div className="p-4">
       <p className="mb-4 font-semibold">Selecciona el rango de precios</p>
-      
       <div className="flex items-center gap-2">
         <label htmlFor="minPrice" className="text-sm font-medium">Precio Mínimo:</label>
         <input
@@ -44,14 +41,14 @@ const PriceRangeSelector = () => {
           min="0"
           max="1000"
           step="10"
-          value={priceRange.min}
+          value={formData.priceRange.min}
           onChange={handlePriceChange}
           className="w-full"
         />
         <input
           type="number"
           name="min"
-          value={priceRange.min}
+          value={formData.priceRange.min}
           onChange={handlePriceChange}
           min="0"
           max="1000"
@@ -59,7 +56,6 @@ const PriceRangeSelector = () => {
           className="w-16 p-1 border rounded"
         />
       </div>
-
       <div className="flex items-center gap-2 mt-4">
         <label htmlFor="maxPrice" className="text-sm font-medium">Precio Máximo:</label>
         <input
@@ -69,14 +65,14 @@ const PriceRangeSelector = () => {
           min="0"
           max="1000"
           step="10"
-          value={priceRange.max}
+          value={formData.priceRange.max}
           onChange={handlePriceChange}
           className="w-full"
         />
         <input
           type="number"
           name="max"
-          value={priceRange.max}
+          value={formData.priceRange.max}
           onChange={handlePriceChange}
           min="0"
           max="1000"
@@ -84,12 +80,8 @@ const PriceRangeSelector = () => {
           className="w-16 p-1 border rounded"
         />
       </div>
-
-      {/* Mostrar el rango seleccionado */}
       <div className="mt-4">
-        <p className="text-sm">
-          Rango de precios seleccionado: ${priceRange.min} - ${priceRange.max}
-        </p>
+        <p className="text-sm">Rango de precios seleccionado: ${formData.priceRange.min} - ${formData.priceRange.max}</p>
       </div>
     </div>
   );

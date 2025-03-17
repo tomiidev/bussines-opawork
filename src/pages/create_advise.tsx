@@ -13,7 +13,7 @@ type User = {
   phone: string,
   description: string,
   especialities: string[],
-  modality: string,
+  time: string,
   subs: string[];
   languages: string[];
   socialNetworks?: { [key: string]: string }; // Redes sociales como objeto
@@ -114,9 +114,9 @@ const CreateAdvise = () => {
 
   return (
     <div className="flex  min-h-screen bg-gray-100">
-      <div className="container mx-auto   max-w-3xl text-center">
-      <Breadcrumb pageName="Crear aviso" number={0} />
-
+      <div className="container mx-auto   max-w-7xl text-center">
+   {/*    <Breadcrumb pageName="Crear aviso" number={0} />
+ */}
       <div className="grid gap-8">
         <CreateAdviseForm user={user} />
      

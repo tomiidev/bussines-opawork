@@ -1,37 +1,44 @@
 import { API_LOCAL, API_URL } from '@/hooks/apis';
 import { FC, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Breadcrumb from '../Breadcrumbs/Breadcrumb';
 import { formatDateToDMY } from '@/hooks/dates';
 
 // Interfaz para el paciente
-interface Paciente {
-  id: string;
+interface PriceRange {
+  min: number;
+  max: number;
+}
+
+interface Advise {
   _id: string;
   name: string;
-  age: string;
-  email: string
-  gender: 'masculino' | 'femenino';
-  phone: string,
-  message: string;
-  createdAt: string,
+  email:string,
+  description: string;
+  languages: string[];
+  especialities: string[]; // Agrega la especialidad al formulario de edición de usuario
+  modality: string; // Agrega la especialidad al formulario de edición de usuario
+  subs: string[];
+  applys: string[],
+  priceRange?: PriceRange;
+  publishedAt: Date
 }
 interface ApiResponse {
-  data: Paciente[];
+  data: Advise[];
 }
 const ListaPacientes: FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
+  const [patientToDelete, setPatientToDelete] = useState<Advise | null>(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   // Estado para manejar la lista de pacientes
-  const [pacientes, setPacientes] = useState<Paciente[]>([]);
-
+  const [pacientes, setPacientes] = useState<Advise[]>([]);
+  const { id } = useParams<{ id: string }>()
   useEffect(() => {
     const obtenerPacientes = async (): Promise<void> => {
       try {
-        const response = await fetch(`${API_URL}/get-patients`, {
+        const response = await fetch(`${API_LOCAL}/get-applies-of-offer/${id}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           mode: "cors",
@@ -56,20 +63,24 @@ const ListaPacientes: FC = () => {
 
     obtenerPacientes();
   }, []); // Se ejecuta solo una vez al montar el componente
-
+console.log(pacientes)
   // Estado para manejar los datos del formulario
-  const [formData, setFormData] = useState<Paciente>({
-    id: "",
-    name: '',
-    age: "",
-    gender: 'masculino', // Género predeterminado
-    email: "",
+/*   const [formData, setFormData] = useState<Advise>({
     _id: "",
-    phone: "",
-    message: "",
-    createdAt: "",
+    name: '',
+    applys: [],
+    description: "",
+    especialities: [],
+    languages: [],
+    modality: "",
+    publishedAt: Date.now(),
+    subs: [],
+    priceRange: {
+      min: 0,
+      max: 0
+    }
 
-  });
+  }); */
 
   // Estado para manejar si el modal está abierto o cerrado
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,55 +90,6 @@ const ListaPacientes: FC = () => {
   };
   // Estado para manejar si estamos editando un paciente
   const [isEditing, setIsEditing] = useState(false);
-
-  // Función para manejar el clic en un paciente
-  const handleClick = (_id: string) => {
-    navigate(`/patients/${_id}`); // Redirige a la vista del paciente
-  };
-
-  // Función para manejar cambios en los inputs del formulario
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Función para agregar un nuevo paciente
-  const handleAddPatient = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    try {
-      const response = await fetch(`${API_LOCAL}/add-patient`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
-        credentials: 'include', // Enviar cookies HTTP-only automáticamente
-        body: JSON.stringify({ formData }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al agregar el paciente');
-      }
-
-      const data = await response.json();
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      setLoading(false)
-      setIsModalOpen(false); // Cerrar modal después de agregar
-      alert('Paciente agregado');
-      setPacientes([
-        ...pacientes,
-        { ...formData },
-      ]);
-      setFormData({ id: "", name: '', age: "", gender: 'masculino', email: "", phone: "", _id: "", message: "", createdAt: "" });
-      return data;
-    } catch (error) {
-      console.error('Error:', error);
-    }
-    finally {
-      setLoading(false)
-    }
-
-  };
 
   // Función para eliminar un paciente
   const handleConfirmDelete = async (e: React.FormEvent) => {
@@ -160,249 +122,125 @@ const ListaPacientes: FC = () => {
     }
   };
 
-  const handleDeleteClick = (p: Paciente) => {
-    setPatientToDelete(p);
-    setShowDeleteModal(true);
-  };
+  const jobs = [
+    {
+      id: 1,
+      title: "Desarrollador Frontend",
+      description: "Buscamos un desarrollador con experiencia en React y Tailwind CSS.",
+      modalidad: "Remoto",
+      salario: "$3,000/mes",
+      aplicantes: "15 postulantes",
+      habilidades: ["React", "Tailwind CSS", "JavaScript", "Redux", "Git", "REST API"],
+      enEspera: false,
+    },
+    {
+      id: 2,
+      title: "Diseñador UX/UI",
+      description: "Se necesita un diseñador con habilidades en Figma y prototipado.",
+      modalidad: "Híbrido",
+      salario: "$2,500/mes",
+      aplicantes: "10 postulantes",
+      habilidades: ["Figma", "Adobe XD", "Prototipado", "Investigación UX", "HTML/CSS"],
+      enEspera: true,
+    },
+    {
+      id: 3,
+      title: "Gerente de Producto",
+      description: "Oportunidad para liderar el desarrollo de nuevos productos digitales.",
+      modalidad: "Presencial",
+      salario: "$4,500/mes",
+      aplicantes: "8 postulantes",
+      habilidades: ["Gestión de Producto", "Scrum", "Metodologías Ágiles", "Data Analysis", "Stakeholder Management"],
+      enEspera: true,
+    },
+  ];
 
 
-  const handleEdit = (paciente: Paciente) => {
-    setFormData(paciente);
-    setIsEditing(true);
-    setIsModalOpen(true); // Abrir el modal para editar
-  };
 
   // Función para actualizar un paciente
-  const handleUpdatePatient = async (e: React.FormEvent) => {
+  
+  /*   const postulantes = [
+      {
+        id: 1,
+        nombre: "Juan Pérez",
+        correo: "juanperez@gmail.com",
+        habilidades: ["React", "Node.js", "Tailwind CSS"],
+        estado: "Pendiente",
+      },
+      {
+        id: 2,
+        nombre: "María López",
+        correo: "marialopez@gmail.com",
+        habilidades: ["Python", "Django", "PostgreSQL"],
+        estado: "Pendiente",
+      },
+      {
+        id: 3,
+        nombre: "Carlos Gómez",
+        correo: "carlosgomez@gmail.com",
+        habilidades: ["Angular", "TypeScript", "MongoDB"],
+        estado: "Pendiente",
+      },
+    ];
+   */
 
-    e.preventDefault()
-    setLoading(true)
-    try {
-      const response = await fetch(`${API_URL}/edit-patient`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
-        credentials: 'include', // Enviar cookies HTTP-only automáticamente
-        body: JSON.stringify({ formData }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al agregar el paciente');
-      }
-
-      const data = await response.json();
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      setLoading(false)
-      /* setPacientes(pacientes.map(paciente => (paciente._id === formData._id ? formData : paciente))); */
-      setFormData({ id: "", name: '', age: "", gender: 'masculino', email: "", phone: "", _id: "", message: "", createdAt: "" });
-      setIsEditing(false);
-      setIsModalOpen(false); // Cerrar el modal después de actualizar
-
-      window.location.reload();
-      return data;
-    } catch (error) {
-      console.error('Error:', error);
-    }
-    finally {
-      setLoading(false)
-    }
-
-
-  };
-
-  // Función para cerrar el modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setFormData({ id: "", name: '', age: "", gender: 'masculino', email: "", phone: "", _id: "", message: "", createdAt: "" });
-    setIsEditing(false); // Resetear el estado de edición
-  };
 
   return (
-    <div>
-      <Breadcrumb pageName="Pacientes" number={pacientes.length} />
-      <div className="flex justify-end mb-4">
+    <div className='container mx-auto   max-w-7xl text-center'>
+      <Breadcrumb pageName="Postulaciones" number={pacientes.length} />
+      <div className="flex justify-end ">
         {/*    <h2 className="text-lg font-semibold">Calendario de citas</h2> */}
-        <button
-          disabled={loading === true}
-          className="bg-primary text-white px-4 py-2 rounded"
-          onClick={() => setIsModalOpen(!isModalOpen)}
-        >
-          {isModalOpen ? "Ver pacientes" : "Nuevo paciente"}
-        </button>
+
       </div>
 
 
-      <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5  dark:border-strokedark dark:bg-boxdark">
-        {/* Modal para agregar o editar pacientes */}
-        {isModalOpen ? (
-          <div className="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-              <h3 className="text-xl font-semibold">{isEditing && 'Editar Paciente'}</h3>
-              <div className="mb-4">
-                <label className="block mb-2">Nombre</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Edad</label>
-                <input
-                  type="text"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Email</label>
-                <input
-                  type="text"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Teléfono</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Género</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="masculino">Masculino</option>
-                  <option value="femenino">Femenino</option>
+      {/* <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5  dark:border-strokedark dark:bg-boxdark">
+ */}
 
-                </select>
-              </div>
-              <div className="flex justify-between">
-                <button
-                  disabled={loading}
-                  onClick={isEditing ? handleUpdatePatient : handleAddPatient}
-                  className={`bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center ${loading ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                >
-                  {loading ? (
-                    <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                    </svg>
-                  ) : isEditing ? (
-                    'Actualizar'
-                  ) : (
-                    'Agregar'
-                  )}
-                </button>
-
-                <button
-                  onClick={closeModal}
-                  className="bg-gray-500 text-white px-4 py-2 rounded"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        ) :
-
-
-          <div className="max-w-full overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="bg-gray-200 text-left dark:bg-meta-4">
-                  <th className="py-3 px-4 font-medium text-black dark:text-white">Nombre</th>
-                  <th className="py-3 px-4 font-medium text-black dark:text-white">Edad</th>
-                  <th className="py-3 px-4 font-medium text-black dark:text-white">Género</th>
-                  <th className="py-3 px-4 font-medium text-black dark:text-white">Teléfono</th>
-                  <th className="py-3 px-4 font-medium text-black dark:text-white">Email</th>
-              {/*     <th className="py-3 px-4 font-medium text-black dark:text-white">Agregado</th> */}
-                  <th className="py-3 px-4 font-medium text-black dark:text-white">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pacientes?.map((paciente) => (
-                  <tr key={paciente.id} className="cursor-pointer hover:bg-gray-100 dark:hover:bg-meta-2">
-                    <td className="border-b border-gray-300 py-3 px-4" onClick={() => handleClick(paciente._id)}>{paciente.name}</td>
-                    <td className="border-b border-gray-300 py-3 px-4" onClick={() => handleClick(paciente._id)}>{paciente.age}</td>
-                    <td className="border-b border-gray-300 py-3 px-4" onClick={() => handleClick(paciente._id)}>{paciente.gender}</td>
-                    <td className="border-b border-gray-300 py-3 px-4" onClick={() => handleClick(paciente._id)}>{paciente.phone}</td>
-                    <td className="border-b border-gray-300 py-3 px-4" onClick={() => handleClick(paciente._id)}>{paciente.email}</td>
-               {/*      <td className="border-b border-gray-300 py-3 px-4" onClick={() => handleClick(paciente._id)}>{formatDateToDMY(paciente.createdAt)}</td> */}
-                    <td className="border-b border-gray-300 py-3 px-4">
-                      <button
-                        className="text-blue-500 mr-2"
-                        onClick={() => handleEdit(paciente)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="text-red-500"
-                        onClick={() => handleDeleteClick(paciente)}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        }
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+          <thead className="bg-blue-800 text-white">
+            <tr>
+              <th className="py-3 px-6 text-left">Nombre</th>
+              <th className="py-3 px-6 text-left">Correo</th>
+            {/*   <th className="py-3 px-6 text-left">Habilidades</th> */}
+              <th className="py-3 px-6 text-left">Estado</th>
+              <th className="py-3 px-6 text-left">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+             {pacientes.map((postulante, index) => (
+              <tr key={index} className="border-b hover:bg-gray-100 text-left">
+                <td className="py-3 px-6">{postulante.name}</td>
+                <td className="py-3 px-6">{postulante.email}</td>
+               {/*  <td className="py-3 px-6">
+                  <div className="flex flex-wrap gap-2">
+                    {postulante.especialities.map((habilidad, i) => (
+                      <span key={i} className="hover:border-blue-300 border-2 text-gray-800 hover:text-blue-500 cursor-pointer px-2 py-1 text-xs rounded-full">
+                        {habilidad}
+                      </span>
+                    ))}
+                  </div>
+                </td> */}
+               {/*  <td className="py-3 px-6">
+                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${postulante.state === "Aprobado" ? "bg-green-500 text-white" : postulante.state === "Pendiente" ? "bg-yellow-500 text-white" : "bg-red-500 text-white"}`}>
+                    {postulante.state}
+                  </span>
+                </td> */}
+                <td className="py-3 px-6">
+                  <Link to={`/postulantes/${postulante._id}/perfil`} className=" text-gray-500  rounded underline">
+                    Ver perfil
+                  </Link>
+                </td>
+              </tr>
+            ))} 
+          </tbody>
+        </table>
       </div>
-      {showDeleteModal && patientToDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg"> {/* Cambié w-96 a w-3/4 */}
-            <h3 className="text-lg font-semibold mb-4">¿Estás seguro de que deseas eliminar este paciente?</h3>
-            <p className="mb-4">Una vez eliminado deberas volver a agregarlo.</p>
 
 
+      {/*  </div> */}
 
-
-            <div className="flex justify-end space-x-4">
-              <button onClick={handleCancelDelete} className="bg-gray-300 px-4 py-2 rounded text-gray-700">
-                Cancelar
-              </button>
-              <button
-                disabled={loading}
-                onClick={handleConfirmDelete}
-                className={`bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center ${loading ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-              >
-                {loading ? (
-                  <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                  </svg>
-                ) : (
-                  'Eliminar'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,12 +1,16 @@
 import PriceRangeSelector from "@/components/priceSelector/price";
-import DateSelector from "@/components/timeDeliver/time";
 import { API_LOCAL } from "@/hooks/apis";
 import React, { useEffect, useState } from "react";
+interface PriceRange {
+  min: number;
+  max: number;
+}
 
 type User = {
   _id: string;
   email: string;
   name: string;
+  languages: string[];
   phone: string;
   description: string;
   photo: string;
@@ -15,6 +19,7 @@ type User = {
   subs: string[];
   department?: string;
   neighborhood?: string;
+  priceRange?: PriceRange;
   socialNetworks?: { [key: string]: string }; // Redes sociales como objeto
 };
 
@@ -102,6 +107,11 @@ const departments = {
 };
 
 const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 1000,
+  });
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -112,7 +122,9 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
     modality: user?.modality || "",
     subs: user?.subs || [],
     department: user?.department || "",
+    languages: user?.languages || [],
     neighborhood: user?.neighborhood || "",
+    priceRange: user?.priceRange || { min: 0, max: 0 },
     socialNetworks: user?.socialNetworks || {
       facebook: "",
       instagram: "",
@@ -133,10 +145,12 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
         description: user.description || "",
         photo: user.photo,
         especialities: user.especialities || [],
+        languages: user?.languages || [],
         modality: user?.modality || "",
         subs: user.subs || [],
         department: user.department || "",
         neighborhood: user.neighborhood || "",
+        priceRange: user?.priceRange || { min: 0, max: 0 },
         socialNetworks: user.socialNetworks || {
           facebook: "",
           instagram: "",
@@ -226,17 +240,17 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
       setInputValue(""); // Limpiar el input después de agregar
     }
   };
-  const toogleLeng = (especialidad: string) => {
+  const toogleLeng = (lan: string) => {
     // Obtener el array de especialidades del estado actual
-    const especialities = formData.especialities;
+    const languages = formData.languages;
 
     // Verificar si la especialidad ya está seleccionada
-    const isSelected = especialities.includes(especialidad);
+    const isSelected = languages.includes(lan);
     setFormData({
       ...formData,
-      especialities: isSelected
-        ? especialities.filter((item) => item !== especialidad) // Elimina si ya está
-        : [...especialities, especialidad], // Agrega si no está
+      languages: isSelected
+        ? languages.filter((item) => item !== lan) // Elimina si ya está
+        : [...languages, lan], // Agrega si no está
     });
   };
   const toggleEspecialidad = (especialidad: string) => {
@@ -302,17 +316,17 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
             <div className="mb-5.5">
               <label className="block text-sm font-medium py-3">Idiomas</label>
               <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
-                {languages.map((especialidad) => {
-                  const isSelected = formData.especialities.includes(especialidad);
+                {languages.map((lan) => {
+                  const isSelected = formData.languages.includes(lan);
                   return (
                     <span
-                      key={especialidad}
-                      onClick={() => toogleLeng(especialidad)}
+                      key={lan}
+                      onClick={() => toogleLeng(lan)}
                       className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
                 ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}
               `}
                     >
-                      {especialidad}
+                      {lan}
                     </span>
                   );
                 })}
@@ -320,7 +334,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
 
 
             </div>
-            <div className="mb-5.5">
+            {/* <div className="mb-5.5">
               <label className="block text-sm font-medium py-3">Especialidades</label>
               <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
                 {generalServices.map((especialidad) => {
@@ -338,27 +352,11 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
                   );
                 })}
               </div>
-              {/* <div className="mt-3 flex flex-wrap gap-2 py-3">
-                {formData?.especialities.map((type) => (
-                  <span
-                    key={type}
-                    className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm flex items-center gap-2"
-                  >
-                    {type}
-                    <button
-                  type="button"
-                  onClick={() => toggleEspecialidad(type)}
-                  className="text-gray-800 hover:text-white"
-                >
-                  ×
-                </button>
-                  </span>
-                ))}
-              </div> */}
+     
 
-            </div>
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Dsiponibilidad</label>
+            </div> */}
+           {/*  <div className="mb-5.5">
+              <label className="block text-sm font-medium py-3">Disponibilidad</label>
               <select
                 name="modality"
                 value={formData.modality}
@@ -372,7 +370,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
 
               </select>
 
-            </div>
+            </div> */}
             {/* <div className="mb-5.5">
               <label className="block text-sm font-medium py-3">Modalidad de trabajo</label>
               <select
@@ -417,7 +415,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
                   </span>
                 ))}
               </div> */}
-{/*               {
+              {/*               {
                 (formData.modality === "online" || formData.modality === "ambas") &&
                 <>
                   <div className="mb-5.5">
@@ -493,7 +491,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
 
 
             </div>
-            <PriceRangeSelector />
+            <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData}/>
 
             <div className="flex justify-end">
               <button

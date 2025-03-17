@@ -2,43 +2,31 @@ import PriceRangeSelector from "@/components/priceSelector/price";
 import DateSelector from "@/components/timeDeliver/time";
 import { API_LOCAL } from "@/hooks/apis";
 import React, { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { generalServices } from "@/services";
+import { useNavigate } from "react-router-dom";
+interface PriceRange {
+  min: number;
+  max: number;
+}
 
 type User = {
   _id: string;
-  email: string;
   name: string;
-  phone: string;
   description: string;
-  photo: string;
+  languages: string[];
   especialities: string[]; // Agrega la especialidad al formulario de edición de usuario
-  modality: string; // Agrega la especialidad al formulario de edición de usuario
   subs: string[];
-  department?: string;
-  neighborhood?: string;
-  socialNetworks?: { [key: string]: string }; // Redes sociales como objeto
+  time: string,
+  priceRange?: PriceRange;
+
 };
 
 interface SharedResourcesProps {
   user: User | null;
 }
 
-const generalServices = [
-  "Diseño Gráfico",
-  "Desarrollo Web",
-  "Marketing Digital",
-  "Redacción y Corrección",
-  "Traducción",
-  "Fotografía y Edición",
-  "Asesoría Legal",
-  "Contabilidad y Finanzas",
-  "Consultoría Empresarial",
-  "Soporte Técnico",
-  "Gestión de Redes Sociales",
-  "Producción Audiovisual",
-  "Atención al Cliente",
-  "Arquitectura e Interiorismo",
-  "Reparaciones y Mantenimiento"
-];
+
 const languages = [
   "Español",
   "Inglés",
@@ -82,70 +70,35 @@ const languages = [
   "Haitiano Creole"
 ];
 
-const departments = {
-  Montevideo: ["Centro", "Pocitos", "Carrasco", "La Teja", "Aguada", "Buceo", "Capurro", "Malvín", "Prado", "Unión", "Parque Rodó"],
-  Canelones: ["Las Piedras", "Pando", "Ciudad de la Costa", "Atlántida", "Barros Blancos", "Toledo", "Sauce", "Santa Lucía"],
-  Maldonado: ["Punta del Este", "Maldonado", "San Carlos", "Pan de Azúcar", "Piriápolis", "Aiguá"],
-  Colonia: ["Colonia del Sacramento", "Carmelo", "Juan Lacaze", "Nueva Helvecia", "Rosario", "Tarariras"],
-  Soriano: ["Mercedes", "Dolores", "Cardona"],
-  Rivera: ["Rivera", "Tranqueras", "Vichadero"],
-  Salto: ["Salto", "Constitución", "Belén"],
-  Paysandú: ["Paysandú", "Guichón", "Quebracho"],
-  Tacuarembó: ["Tacuarembó", "Paso de los Toros", "San Gregorio de Polanco"],
-  Artigas: ["Artigas", "Bella Unión"],
-  Rocha: ["Rocha", "Chuy", "Castillos", "La Paloma"],
-  Treinta_y_Tres: ["Treinta y Tres", "Vergara"],
-  Cerro_Largo: ["Melo", "Rio Branco"],
-  Florida: ["Florida", "Sarandí Grande"],
-  Flores: ["Trinidad"],
-  Durazno: ["Durazno", "Sarandí del Yí"]
-};
+
 
 const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 1000,
+  });
+const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: user?.name || "",
-    phone: user?.phone || "",
-    email: user?.email || "",
+    languages: user?.languages || [],
     description: user?.description || "",
     especialities: user?.especialities || [],
-    photo: user?.photo,
-    modality: user?.modality || "",
+    time: user?.time || "",
     subs: user?.subs || [],
-    department: user?.department || "",
-    neighborhood: user?.neighborhood || "",
-    socialNetworks: user?.socialNetworks || {
-      facebook: "",
-      instagram: "",
-      linkedin: "",
-      twitter: "",
-      youtube: "",
-      tiktok: "",
-      github: "",
-    }, // Inicializa redes sociales si están presentes
+    priceRange: user?.priceRange || { min: 0, max: 0 },// Inicializa redes sociales si están presentes
   });
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || "",
-        phone: user.phone || "",
-        email: user.email || "", // Asegura que el email se setea
+        // Asegura que el email se setea
+        languages: user?.languages || [],
         description: user.description || "",
-        photo: user.photo,
         especialities: user.especialities || [],
-        modality: user?.modality || "",
+        time: user?.time || "",
         subs: user.subs || [],
-        department: user.department || "",
-        neighborhood: user.neighborhood || "",
-        socialNetworks: user.socialNetworks || {
-          facebook: "",
-          instagram: "",
-          linkedin: "",
-          twitter: "",
-          youtube: "",
-          tiktok: "",
-          github: "",
-        }, // Inicializa redes sociales si están presentes
+        priceRange: user?.priceRange || { min: 0, max: 0 } // Inicializa redes sociales si están presentes
       });
     }
   }, [user]); // Ejecuta el efecto cuando `user` cambia
@@ -167,7 +120,7 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_LOCAL}/user-information`, {
+      const response = await fetch(`${API_LOCAL}/advise-information`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -179,8 +132,8 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
         throw new Error("Error al actualizar el perfil");
       }
 
-      alert("Perfil actualizado con éxito");
-      window.location.reload();
+      toast.success("Aviso publicado con éxito");
+      navigate(-1)
     } catch (error) {
       console.error(error);
       alert("Hubo un error, intenta nuevamente");
@@ -196,16 +149,7 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
       subs: updatedTherapyTypes.length > 0 ? updatedTherapyTypes : [],
     });
   };
-  const handleSocialNetworkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      socialNetworks: {
-        ...prev.socialNetworks,
-        [name]: value,
-      },
-    }));
-  };
+
 
 
   const [inputValue, setInputValue] = useState<string>("");
@@ -226,35 +170,52 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
       setInputValue(""); // Limpiar el input después de agregar
     }
   };
-  const toogleLeng = (especialidad: string) => {
+  const toogleLeng = (lang: string) => {
     // Obtener el array de especialidades del estado actual
-    const especialities = formData.especialities;
+    const languages = formData.languages;
 
     // Verificar si la especialidad ya está seleccionada
-    const isSelected = especialities.includes(especialidad);
+    const isSelected = languages.includes(lang);
     setFormData({
       ...formData,
-      especialities: isSelected
-        ? especialities.filter((item) => item !== especialidad) // Elimina si ya está
-        : [...especialities, especialidad], // Agrega si no está
+      languages: isSelected
+        ? languages.filter((item) => item !== lang) // Elimina si ya está
+        : [...languages, lang], // Agrega si no está
     });
   };
   const toggleEspecialidad = (especialidad: string) => {
-    // Obtener el array de especialidades del estado actual
-    const especialities = formData.especialities;
+    setFormData((prevFormData) => {
+      const especialities = prevFormData.especialities;
+      const isSelected = especialities.includes(especialidad);
 
-    // Verificar si la especialidad ya está seleccionada
-    const isSelected = especialities.includes(especialidad);
-    if (!isSelected && especialities.length === 3) {
-      // Mostrar un mensaje si ya hay 3 especialidades seleccionadas
-      alert("Puedes seleccionar hasta 3 especialidades.");
-      return; // No permitir agregar más si ya hay 3 seleccionadas
-    }
-    setFormData({
-      ...formData,
-      especialities: isSelected
-        ? especialities.filter((item) => item !== especialidad) // Elimina si ya está
-        : [...especialities, especialidad], // Agrega si no está
+      if (!isSelected && especialities.length === 2) {
+        alert(`Solo puedes seleccionar hasta ${2} especialidades.`);
+        return prevFormData; // Retorna el estado anterior sin cambios
+      }
+
+      return {
+        ...prevFormData,
+        especialities: isSelected
+          ? especialities.filter((item) => item !== especialidad)
+          : [...especialities, especialidad],
+      };
+    });
+  };
+  const toggleSubs = (sub: string) => {
+    setFormData((prevFormData) => {
+      const subs = prevFormData.subs;
+      const isSelected = subs.includes(sub);
+
+      if (!isSelected && subs.length >= 10) {
+        // Aquí podrías usar un toast en lugar de alert para mejor UX
+        toast.error(`No podes elegír más subespecialidades.`);
+        return prevFormData; // Retorna el estado anterior sin cambios
+      }
+
+      return {
+        ...prevFormData,
+        subs: isSelected ? subs.filter((item) => item !== sub) : [...subs, sub],
+      };
     });
   };
 
@@ -291,17 +252,17 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
             <div className="">
               <label className="block text-sm font-medium py-3">Idiomas</label>
               <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
-                {languages.map((especialidad) => {
-                  const isSelected = formData.especialities.includes(especialidad);
+                {languages.map((lan) => {
+                  const isSelected = formData.languages.includes(lan);
                   return (
                     <span
-                      key={especialidad}
-                      onClick={() => toogleLeng(especialidad)}
+                      key={lan}
+                      onClick={() => toogleLeng(lan)}
                       className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
                 ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}
               `}
                     >
-                      {especialidad}
+                      {lan}
                     </span>
                   );
                 })}
@@ -312,93 +273,56 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
             <div className="mb-5.5">
               <label className="block text-sm font-medium py-3">Especialidades</label>
               <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
-                {generalServices.map((especialidad) => {
-                  const isSelected = formData.especialities.includes(especialidad);
+                {Object.keys(generalServices).map((categoria) => {
+                  const isSelected = formData.especialities.includes(categoria);
                   return (
                     <span
-                      key={especialidad}
-                      onClick={() => toggleEspecialidad(especialidad)}
+                      key={categoria}
+                      onClick={() => toggleEspecialidad(categoria)}
                       className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
-                ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}
-              `}
+          ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
                     >
-                      {especialidad}
+                      {categoria}
                     </span>
                   );
                 })}
               </div>
-             
-
             </div>
-            <div className="">
-              <label className="block text-sm font-medium mb-3">Sub especialidades</label>
-              <input
-                type="text"
-                placeholder="Escribí lo que hagas mejor y presioná Enter"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                name="subs"
-                className="w-full rounded border border-stroke py-3 px-4"
-              />
-              <div className="mt-3 flex flex-wrap gap-2 py-3">
-                {formData.subs.map((type) => (
-                  <span
-                    key={type}
-                    className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm flex items-center gap-2"
-                  >
-                    {type}
-                    <button
-                      type="button"
-                      onClick={() => removeTherapyType(type)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
+            {formData.especialities.length > 0 && (
+              <div className="my-5.5">
+                <h3>Subespecialidades</h3>
+                {formData.especialities.map((categoria: string) => {
+                  const subespecialidades = generalServices[categoria];
+                  return (
+                    <div key={categoria} className="my-5">
+
+                      <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
+                        {/* Mapear las subespecialidades */}
+                        {subespecialidades.map((sub: string) => {
+                          const isSubSelected = formData.subs.includes(sub);
+                          return (
+                            <span
+                              key={sub}
+                              onClick={() => toggleSubs(sub)}
+                              className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all ${isSubSelected ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                            >
+                              {sub}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+            )}
 
-              {/*               {
-                (formData.modality === "online" || formData.modality === "ambas") &&
-                <>
-                  <div className="mb-5.5">
-                    <label className="block text-sm font-medium py-3">Departamento</label>
-                    <select
-                      name="department"
-                      value={formData.department}
-                      onChange={handleChange}
-                      className="w-full rounded border border-stroke py-3 px-4"
-                    >
-                      <option value="">Selecciona un departamento</option>
-                      {Object.keys(departments).map((dept) => (
-                        <option key={dept} value={dept}>{dept}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="mb-5.5">
-                    <label className="block text-sm font-medium py-3">Barrio</label>
-                    <select
-                      name="neighborhood"
-                      value={formData.neighborhood}
-                      onChange={handleChange}
-                      className="w-full rounded border border-stroke py-3 px-4"
-                      disabled={!formData.department}
-                    >
-                      <option value="">Selecciona un barrio</option>
-                      {formData.department && (departments[formData.department as keyof typeof departments])?.map((barrio) => (
-                        <option key={barrio} value={barrio}>{barrio}</option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              } */}
-            </div>
             <div className="">
-              <label className="block text-sm font-medium py-3">Dsiponibilidad</label>
+              <label className="block text-sm font-medium py-3">Disponibilidad de tiempo</label>
               <select
-                name="modality"
-                value={formData.modality}
+                name="time"
+                value={formData.time}
                 onChange={handleChange}
                 className="w-full rounded border border-stroke py-3 px-4"
               >
@@ -410,7 +334,7 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
               </select>
 
             </div>
-            <div className="">
+            {/* <div className="">
               <label className="block text-sm font-medium py-3">Modalidad de trabajo</label>
               <select
                 name="modality"
@@ -425,9 +349,9 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
 
               </select>
 
-            </div>
+            </div> */}
 
-            <PriceRangeSelector />
+            <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData} />
 
 
             <div className="flex justify-end">
@@ -442,6 +366,10 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
           </form>
         </div>
       </div>
+      <Toaster toastOptions={{
+        duration: 3000,
+        position: "bottom-center"
+      }} />
     </div>
   );
 };
