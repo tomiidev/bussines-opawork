@@ -1,10 +1,10 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { supabase } from "@/supabase"; // Asegúrate de que supabase esté configurado correctamente
 import axios from "axios";
-import { API_LOCAL, API_URL } from "@/hooks/apis";
+import { API_LOCAL } from "@/hooks/apis";
 
 interface User {
-  id: string;
+  _id: string;
   email: string;
   name: string;
   typeAccount: string;
@@ -15,13 +15,13 @@ interface User {
   sender_mongo_id: string
 }
 
-interface Message {
+/* interface Message {
   id: string;
   text: string;
   senderId: string;
   receiverId: string;
   timestamp: string;
-}
+} */
 interface Message {
   id: string;
   sender_mongo_id: string;
@@ -35,7 +35,7 @@ interface Chat {
   user2: string;
   name_one: string;
   name_two: string;
-  created_at: string;
+  created_at: Date;
   messages: Message[]; // Almacenamos los mensajes relacionados con este chat
 }
 
@@ -43,8 +43,9 @@ interface ChatContextType {
   chats: Chat[];
   chat: Chat | null;
   activeChat: Chat | null;
+  titleAdvise: string | null;
   user: User | null;
-  receiver: User| undefined;
+  receiver: User | undefined;
   receivers: User[];
   messages: Message[] | null;
   setUser: (user: User) => void;
@@ -66,7 +67,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
   const [receiver, setReceiver] = useState<User>();
   const [receivers, setReceivers] = useState<User[]>([]); // 🔹 Corregido: ya no se necesita `[]` explícito
   const [messages, setMessages] = useState<Message[]>([]);
-
+  const [titleAdvise, setTitleAdvise] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   ; // Asegúrate de reemplazarlo con el userId real del usuario autenticado
   useEffect(() => {
@@ -74,24 +75,12 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
 
     const checkAuth = async () => {
       try {
-        const response = await axios.get(`${API_URL}/check-auth`, { withCredentials: true });
+        const response = await axios.get(`${API_LOCAL}/check-auth`, { withCredentials: true });
 
         if (response.status === 200) {
+          console.log(response)
           const userData = response.data.user;
-          console.log(userData)
           setUser(userData);
-          if (userData.typeAccount === "u") {
-             window.location.replace("https://auth.opawork.app")
-    
-            // Redirige al usuario a la página de inicio o dashboard
-            /* navigate('/')  */
-            window.location.replace("http://localhost:5174")
-          }
-          else if (userData.typeAccount === "b") {
-            /* window.location.replace("http://localhost:5173") */
-             window.location.replace("https://negocios.opawork.app")
-    
-          }
         } else {
           setUser(null);
 
@@ -211,7 +200,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
          if (!receiverId) return;
     */
       try {
-        const response = await fetch(`${API_URL}/messages`, {
+        const response = await fetch(`${API_LOCAL}/messages`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json',
@@ -221,7 +210,9 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
           credentials: "include"
         });
         const data = await response.json();
-        setReceivers(data.data || "Usuario desconocido");
+        if (data) {
+          setReceivers(data.data);
+        }
         console.log(data.data)
       } catch (error) {
         console.error("Error obteniendo el nombre del receptor:", error);
@@ -236,30 +227,60 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
       const receiverId = getReceiverId();
 
       if (!receiverId) return;
-      console.log(receiverId)
+      console.log(receiverId);
+
       try {
-        const response = await fetch(`${API_URL}/messages/${receiverId}`, {
+        const response = await fetch(`${API_LOCAL}/messages/${receiverId}`, {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
           },
           mode: "cors",
-          credentials: "include"
+          credentials: "include",
         });
+
         const data = await response.json();
-        console.log(data)
+        console.log(data);
         setReceiver(data.data || "Usuario desconocido");
       } catch (error) {
         console.error("Error obteniendo el nombre del receptor:", error);
-
       }
     };
 
     fetchReceiverName();
-  }, [receivers,chat]);
+  }, [chat]); // Esta dependencia debería estar solo en `chat`, ya que cuando cambia el chat es cuando necesitas obtener un nuevo receptor
+  
+  // Este useEffect se activará cuando `receiver` cambie y solo hará la petición de `title` si `receiver` no es nulo
+  useEffect(() => {
+    if (receivers.length > 0 && receiver) {
+      fetchTitleOfAdvise();
+    }
+  }, [chats,receivers, receiver]); // Aquí estamos pendientes del cambio de `receiver`
+  const fetchTitleOfAdvise = async () => {
+    
+    
+    console.log(receiver)
+    try {
+      const response = await fetch(`${API_LOCAL}/title-of-advise/${receiver?._id}`, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: "cors",
+        credentials: "include",
+      });
+      const data = await response.json();
+      setTitleAdvise(data.data || "Titulo no procesado.");
+    } catch (error) {
+      console.error("Error obteniendo el nombre del receptor:", error);
+    }
+  };
+
+
+
   return (
     <ChatContext.Provider value={{
-      chat, chats, activeChat, setActiveChat, user, setUser, setChats, receiver, messages, setMessages, receivers, setReceivers, setChat,
+      chat, chats, activeChat, setActiveChat, user, setUser, setChats, receiver, messages, setMessages, receivers, setReceivers, setChat, titleAdvise
     }}>
       {children}
     </ChatContext.Provider>

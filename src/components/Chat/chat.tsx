@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../supabase";
 import { useChat } from "@/context/ctx";
 import { es } from "date-fns/locale";
 import { v4 as uuidv4 } from 'uuid'; // Asegúrate de instalar uuid si no lo tienes: npm install uuid
 import { validateMessage } from "@/hooks/block_word_chat"
 import { format } from "date-fns";
+import { API_LOCAL } from "@/hooks/apis";
 
 
 
@@ -13,10 +14,12 @@ export default function ChatWindow({ onBack }: { onBack: () => void }) {
   /*   const [messages, setMessages] = useState<Message[]>([]); */
   const [text, setText] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { activeChat, user, receiver, messages, /* getReceiverId */receivers } = useChat(); // user contiene el usuario autenticado
+  
+  const { activeChat, user, receiver, messages, /* getReceiverId */receivers, titleAdvise } = useChat(); // user contiene el usuario autenticado
   /*  const [chat, setChat] = useState<Chat | null>(null); */
   /*  const [receiverName, setReceiverName] = useState<User | null>(null);
   */
+
   /*   // Obtener el nombre del otro usuario desde MongoDB
     useEffect(() => {
       const fetchReceiverName = async () => {
@@ -158,12 +161,21 @@ export default function ChatWindow({ onBack }: { onBack: () => void }) {
       setErrorMessage("Ocurrió un error inesperado.");
     }
   };
-
+  console.log(titleAdvise)
   return (
     <div className="flex flex-col h-screen bg-gray-100 w-full  mx-auto border-l border-r">
-      <div className="p-4 flex items-center border-b bg-white">
+      <div className="p-4  border-b bg-white">
         <button className="md:hidden mr-4" onClick={onBack}>🔙</button>
-          <span className="mr-4 font-roboto">Conectaste con {receiver?.name}</span>
+        <p className="mr-4 font-roboto">
+  Conectaste con {receiver?.name || "desconocido"} a las {" "}
+  {activeChat?.created_at ? (
+    format(new Date(activeChat.created_at), "HH:mm dd-MM-yy", { locale: es })
+  ) : (
+    "fecha desconocida"
+  )}
+</p>
+
+        <p className="mr-4 font-roboto">Por aviso de <strong>{titleAdvise ? titleAdvise: "Cargando..."}</strong></p>
       </div>
       {errorMessage && (
         <div className="bg-red-500 text-white p-2 mb-4 rounded">{errorMessage}</div>
@@ -196,15 +208,15 @@ export default function ChatWindow({ onBack }: { onBack: () => void }) {
             return (
               <div key={index} className="flex flex-col">
                 <div
-                  className={`p-2 rounded-full px-3 max-w-xs ${isUserMessage
-                      ? "bg-blue-500 text-white self-end ml-auto"
-                      : "bg-gray-300 self-start mr-auto"
+                  className={`p-2 mt-5 rounded-full px-3 shadow-lg max-w-xs ${isUserMessage
+                    ? "bg-blue-500 text-white self-end ml-auto"
+                    : "bg-white self-start mr-auto"
                     }`}
                 >
                   {msg.text}
                 </div>
                 <div
-                  className={`text-xs ${isUserMessage ? "self-end mr-2" : "self-start ml-2"
+                  className={`text-xs pt-2 ${isUserMessage ? "self-end mr-2" : "self-start ml-2"
                     }`}
                 >
                   {isUserMessage ? "Tú" : otherParticipantName} -{" "}

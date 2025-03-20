@@ -2,7 +2,7 @@ import { useChat } from "@/context/ctx";
 
 // Cargar chats del usuario
 export function ListofChats({ onSelectChat }: { onSelectChat: () => void }) {
-  const { chats, setActiveChat, activeChat, user, receivers } = useChat();
+  const { chats, setActiveChat, activeChat, user, receivers, titleAdvise } = useChat();
 
   return (
     <div className="h-full overflow-y-auto">
@@ -18,7 +18,7 @@ export function ListofChats({ onSelectChat }: { onSelectChat: () => void }) {
             (r) => r.user1 === otherUserId || r.user2 === otherUserId
           );
 
-          console.log("Receiver Data:", receiverData); // Depuración
+
 
           // Obtener el nombre del participante basado en el otherUserId
           let otherParticipantName = "Usuario desconocido";
@@ -39,11 +39,19 @@ export function ListofChats({ onSelectChat }: { onSelectChat: () => void }) {
                 setActiveChat(chat);
                 onSelectChat();
               }}
-              className={`p-4 w-full cursor-pointer border-b font-roboto text-left hover:bg-gray-300 ${activeChat?.id === chat.id ? "bg-gray-200" : "hover:bg-gray-100"
-                }`}
+              className={`p-4 w-full cursor-pointer border-b font-roboto text-left hover:bg-gray-300 ${activeChat?.id === chat.id ? "bg-gray-200" : "hover:bg-gray-100"}`}
             >
-              {otherParticipantName}
+              {/* Fila 1: Nombre del otro participante */}
+              <div className="flex justify-between items-center">
+                <span className="font-bold">{otherParticipantName}</span>
+              </div>
+
+              {/* Fila 2: Título del aviso */}
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-sm text-gray-500">Por aviso de <strong>{titleAdvise ? titleAdvise: "Cargando..."}</strong></span>
+              </div>
             </button>
+
           );
         })
       )}
