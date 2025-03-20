@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { supabase } from "@/supabase"; // Asegúrate de que supabase esté configurado correctamente
 import axios from "axios";
-import { API_LOCAL } from "@/hooks/apis";
+import { API_LOCAL, API_URL } from "@/hooks/apis";
 
 interface User {
   _id: string;
@@ -200,7 +200,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
          if (!receiverId) return;
     */
       try {
-        const response = await fetch(`${API_LOCAL}/messages`, {
+        const response = await fetch(`${API_URL}/messages`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json',
@@ -230,7 +230,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
       console.log(receiverId);
 
       try {
-        const response = await fetch(`${API_LOCAL}/messages/${receiverId}`, {
+        const response = await fetch(`${API_URL}/messages/${receiverId}`, {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -261,7 +261,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
     
     console.log(receiver)
     try {
-      const response = await fetch(`${API_LOCAL}/title-of-advise/${receiver?._id}`, {
+      const response = await fetch(`${API_URL}/title-of-advise/${receiver?._id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
