@@ -9,6 +9,9 @@ interface PriceRange {
   min: number;
   max: number;
 }
+interface DeliveryDate {
+  deliveryDate: string
+}
 
 type User = {
   _id: string;
@@ -18,6 +21,8 @@ type User = {
   especialities: string[]; // Agrega la especialidad al formulario de edición de usuario
   subs: string[];
   time: string,
+  endDateProject: DeliveryDate
+  fixedPrice: string
   priceRange?: PriceRange;
 
 };
@@ -77,14 +82,17 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
     min: 0,
     max: 1000,
   });
-const navigate = useNavigate()
+  const [deliveryDate, setDeliveryDate] = useState<string>("")
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: user?.name || "",
     languages: user?.languages || [],
     description: user?.description || "",
     especialities: user?.especialities || [],
     time: user?.time || "",
+    endDateProject: user?.endDateProject || { deliveryDate: "" },
     subs: user?.subs || [],
+    fixedPrice: user?.fixedPrice || "no",
     priceRange: user?.priceRange || { min: 0, max: 0 },// Inicializa redes sociales si están presentes
   });
   const [loading, setLoading] = useState(false);
@@ -98,6 +106,8 @@ const navigate = useNavigate()
         especialities: user.especialities || [],
         time: user?.time || "",
         subs: user.subs || [],
+        endDateProject: user?.endDateProject || { deliveryDate: "" },
+        fixedPrice: user?.fixedPrice || "no",
         priceRange: user?.priceRange || { min: 0, max: 0 } // Inicializa redes sociales si están presentes
       });
     }
@@ -318,7 +328,7 @@ const navigate = useNavigate()
               </div>
             )}
 
-            <div className="">
+            <div className="mb-5.5">
               <label className="block text-sm font-medium py-3">Disponibilidad de tiempo</label>
               <select
                 name="time"
@@ -327,36 +337,39 @@ const navigate = useNavigate()
                 className="w-full rounded border border-stroke py-3 px-4"
               >
                 <option value="">Selecciona una modalidad</option>
-                <option value="online">Tiempo completo</option>
-                <option value="presencial">Medio tiempo</option>
-                <option value="ambas">Fines de semana</option>
+                <option value="Tiempo completo">Tiempo completo</option>
+                <option value="Medio tiempo">Medio tiempo</option>
+                <option value="Fines de semana">Fines de semana</option>
 
               </select>
 
             </div>
-            {/* <div className="">
-              <label className="block text-sm font-medium py-3">Modalidad de trabajo</label>
+            <div className="mb-5.5">
+              <label className="block text-sm font-medium py-3">Precio negociable</label>
               <select
-                name="modality"
-                value={formData.modality}
+                name="fixedPrice"
+                value={formData.fixedPrice}
                 onChange={handleChange}
                 className="w-full rounded border border-stroke py-3 px-4"
               >
-                <option value="">Selecciona una modalidad</option>
-                <option value="online">Remoto</option>
-                <option value="presencial">Presencial</option>
-                <option value="ambas">Ambas</option>
+                <option value="">Selecciona</option>
+                <option value="si">Sí</option>
+                <option value="no">No</option>
+
 
               </select>
 
-            </div> */}
-
-            <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData} />
+            </div>
+            <div className="mb-5.5">
+              <DateSelector deliveryDate={deliveryDate} setDeliveryDate={setDeliveryDate} formData={formData} setFormData={setFormData} />
+              <p className="mb-4 text-gray-500">Para inidicar un presupuesto exacto se debe situar en el mismo valor ambos inputs.</p>
+              <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData} />
+            </div>
 
 
             <div className="flex justify-end">
               <button
-                className="bg-primary text-white py-2 px-6 rounded hover:bg-opacity-90"
+                className="bg-blue-500 text-white py-2 px-6 rounded hover:bg-opacity-90"
                 type="submit"
                 disabled={loading}
               >

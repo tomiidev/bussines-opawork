@@ -65,14 +65,19 @@ const SignIn: React.FC = () => {
 
       const result = await response.json();
       console.log('Login successful:', result);
+      if (result.user.typeAccount === "u") {
+        window.location.replace("https://auth.opawork.app")
 
-      // Redirige al usuario a la página de inicio o dashboard
-
+       // Redirige al usuario a la página de inicio o dashboard
        /* navigate('/')  */
-       window.location.replace("https://negocios.opawork.app") 
-          /* window.location.replace("http://localhost:5173")  */
-         /*  window.location.replace("https://www.contygoo.com")  */
-      /*  window.location.href = "http://localhost:5173"; */
+       /* window.location.replace("http://localhost:5174") */
+     }
+     else if (result.user.typeAccount === "b") {
+       /* window.location.replace("http://localhost:5173") */
+        window.location.replace("https://negocios.opawork.app")
+
+     }
+     /*  window.location.href = "http://localhost:5173"; */
     } catch (err) {
       setLoading(false);
       setError('Error de conexión. Intenta de nuevo más tarde.');

@@ -1,9 +1,13 @@
-import PriceRangeSelector from "@/components/priceSelector/price";
+import PaymentMethodMap from "@/components/paymentsMethods/pm";
 import { API_LOCAL } from "@/hooks/apis";
 import React, { useEffect, useState } from "react";
 interface PriceRange {
   min: number;
   max: number;
+}
+interface Payment {
+  method: string,
+  value: string,
 }
 
 type User = {
@@ -20,6 +24,7 @@ type User = {
   department?: string;
   neighborhood?: string;
   priceRange?: PriceRange;
+  paymentsMethods: Payment[]
   socialNetworks?: { [key: string]: string }; // Redes sociales como objeto
 };
 
@@ -27,23 +32,7 @@ interface SharedResourcesProps {
   user: User | null;
 }
 
-const generalServices = [
-  "Diseño Gráfico",
-  "Desarrollo Web",
-  "Marketing Digital",
-  "Redacción y Corrección",
-  "Traducción",
-  "Fotografía y Edición",
-  "Asesoría Legal",
-  "Contabilidad y Finanzas",
-  "Consultoría Empresarial",
-  "Soporte Técnico",
-  "Gestión de Redes Sociales",
-  "Producción Audiovisual",
-  "Atención al Cliente",
-  "Arquitectura e Interiorismo",
-  "Reparaciones y Mantenimiento"
-];
+
 const languages = [
   "Español",
   "Inglés",
@@ -87,31 +76,14 @@ const languages = [
   "Haitiano Creole"
 ];
 
-const departments = {
-  Montevideo: ["Centro", "Pocitos", "Carrasco", "La Teja", "Aguada", "Buceo", "Capurro", "Malvín", "Prado", "Unión", "Parque Rodó"],
-  Canelones: ["Las Piedras", "Pando", "Ciudad de la Costa", "Atlántida", "Barros Blancos", "Toledo", "Sauce", "Santa Lucía"],
-  Maldonado: ["Punta del Este", "Maldonado", "San Carlos", "Pan de Azúcar", "Piriápolis", "Aiguá"],
-  Colonia: ["Colonia del Sacramento", "Carmelo", "Juan Lacaze", "Nueva Helvecia", "Rosario", "Tarariras"],
-  Soriano: ["Mercedes", "Dolores", "Cardona"],
-  Rivera: ["Rivera", "Tranqueras", "Vichadero"],
-  Salto: ["Salto", "Constitución", "Belén"],
-  Paysandú: ["Paysandú", "Guichón", "Quebracho"],
-  Tacuarembó: ["Tacuarembó", "Paso de los Toros", "San Gregorio de Polanco"],
-  Artigas: ["Artigas", "Bella Unión"],
-  Rocha: ["Rocha", "Chuy", "Castillos", "La Paloma"],
-  Treinta_y_Tres: ["Treinta y Tres", "Vergara"],
-  Cerro_Largo: ["Melo", "Rio Branco"],
-  Florida: ["Florida", "Sarandí Grande"],
-  Flores: ["Trinidad"],
-  Durazno: ["Durazno", "Sarandí del Yí"]
-};
+
 
 const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
   const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({
     min: 0,
     max: 1000,
   });
-
+  const [selectedMethod, setSelectedMethod] = useState<Payment>({ method: "", value: "" });
   const [formData, setFormData] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -124,6 +96,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
     department: user?.department || "",
     languages: user?.languages || [],
     neighborhood: user?.neighborhood || "",
+    paymentsMethods: user?.paymentsMethods || [{ method: "" }],
     priceRange: user?.priceRange || { min: 0, max: 0 },
     socialNetworks: user?.socialNetworks || {
       facebook: "",
@@ -148,6 +121,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
         languages: user?.languages || [],
         modality: user?.modality || "",
         subs: user.subs || [],
+        paymentsMethods: user?.paymentsMethods || [],
         department: user.department || "",
         neighborhood: user.neighborhood || "",
         priceRange: user?.priceRange || { min: 0, max: 0 },
@@ -176,10 +150,10 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
       ...(name === "department" ? { neighborhood: "" } : {}),
     }));
   };
+  console.log(formData)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const response = await fetch(`${API_LOCAL}/user-information`, {
         method: "POST",
@@ -355,7 +329,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
      
 
             </div> */}
-           {/*  <div className="mb-5.5">
+            {/*  <div className="mb-5.5">
               <label className="block text-sm font-medium py-3">Disponibilidad</label>
               <select
                 name="modality"
@@ -491,7 +465,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
 
 
             </div>
-            <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData}/>
+            {/*  <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData}/> */}
 
             <div className="flex justify-end">
               <button
@@ -505,6 +479,7 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
           </form>
         </div>
       </div>
+      <PaymentMethodMap formData={formData} selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod} setFormData={setFormData} />
     </div>
   );
 };

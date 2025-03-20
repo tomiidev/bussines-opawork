@@ -20,7 +20,10 @@
   border-style: solid;
   border-radius: 50%;
 }
-
+body{
+  background-color: #fbfbfb;
+overflow: hidden;
+}
 @layer utilities {
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {

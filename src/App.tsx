@@ -16,6 +16,7 @@ import CreateAdvise from './pages/create_advise';
 import Tables from './pages/Tables';
 import ListaPacientes from './components/Tables/TableThree';
 import UserProfileApply from './pages/profileUserApply';
+import CLayout from './components/Chat/layout__2';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,7 +57,7 @@ function App() {
           setIsAuthenticated(false);
 
           // Excluir rutas públicas de la redirección
-          const isPublicRoute = pathname.startsWith('/p') || pathname.startsWith('/auth');
+          const isPublicRoute =  pathname.startsWith('/auth');
           if (!isPublicRoute) {
             navigate('/auth/signin', { replace: true });
           }
@@ -165,6 +166,15 @@ function App() {
                 <>
                   <PageTitle title="Crear aviso | MiChamba" />
                   <CreateAdvise />
+                </>
+              }
+            />
+               <Route
+              path="/mensajes"
+              element={
+                <>
+                  <PageTitle title="Mensajes | Oapwork" />
+                  <CLayout />
                 </>
               }
             />

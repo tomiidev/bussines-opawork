@@ -1,42 +1,65 @@
-import { API_LOCAL, API_URL } from '@/hooks/apis';
+import { API_LOCAL } from '@/hooks/apis';
 import { FC, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import Breadcrumb from '../Breadcrumbs/Breadcrumb';
-import { formatDateToDMY } from '@/hooks/dates';
+import { supabase } from '@/supabase';
+import { v5 as uuidv5 } from 'uuid';
+import { useChat } from '@/context/ctx';
 
-// Interfaz para el paciente
-interface PriceRange {
-  min: number;
-  max: number;
+// Interfaces
+interface User {
+  _id: string;
+  email: string;
+  name: string;
+  typeAccount: string;
+  name_one: string;
+  name_two: string;
+  user1: string;
+  user2: string;
+  sender_mongo_id: string;
+}
+
+interface Applys {
+  status: string;
+  userId: string;
+  _id: string;
 }
 
 interface Advise {
   _id: string;
   name: string;
-  email:string,
+  email: string;
   description: string;
   languages: string[];
-  especialities: string[]; // Agrega la especialidad al formulario de edición de usuario
-  modality: string; // Agrega la especialidad al formulario de edición de usuario
+  especialities: string[];
+  modality: string;
   subs: string[];
-  applys: string[],
-  priceRange?: PriceRange;
-  publishedAt: Date
+  applys: Applys[];
+  publishedAt: Date;
 }
+
 interface ApiResponse {
-  data: Advise[];
+  data: User[];
 }
+
 const ListaPacientes: FC = () => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [patientToDelete, setPatientToDelete] = useState<Advise | null>(null);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  // Estado para manejar la lista de pacientes
-  const [pacientes, setPacientes] = useState<Advise[]>([]);
-  const { id } = useParams<{ id: string }>()
+  const [pacientes, setPacientes] = useState<User[]>([]);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [selectedAction, setSelectedAction] = useState<"select" | "discard" | null>(null);
+  const [selectedPostulante, setSelectedPostulante] = useState<User | null>(null);
+  const [actionLoading, setActionLoading] = useState<boolean>(false);
+  const { user } = useChat();
+  const { id } = useParams<{ id: string }>();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [text, setText] = useState("");
+  const navigate = useNavigate()
   useEffect(() => {
-    const obtenerPacientes = async (): Promise<void> => {
+    const obtenerPacientes = async () => {
       try {
         const response = await fetch(`${API_LOCAL}/get-applies-of-offer/${id}`, {
           method: 'GET',
@@ -44,16 +67,16 @@ const ListaPacientes: FC = () => {
           mode: "cors",
           credentials: 'include'
         });
+
         if (!response.ok) throw new Error('Error al obtener pacientes');
+
         const result: ApiResponse = await response.json();
 
-        // Verificamos que 'result.data' sea un arreglo de pacientes
         if (result.data && Array.isArray(result.data)) {
-          setPacientes(result.data); // Asignamos los pacientes al estado
+          setPacientes(result.data);
         } else {
           throw new Error('Los datos de pacientes no están en el formato esperado');
         }
-
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -62,185 +85,157 @@ const ListaPacientes: FC = () => {
     };
 
     obtenerPacientes();
-  }, []); // Se ejecuta solo una vez al montar el componente
-console.log(pacientes)
-  // Estado para manejar los datos del formulario
-/*   const [formData, setFormData] = useState<Advise>({
-    _id: "",
-    name: '',
-    applys: [],
-    description: "",
-    especialities: [],
-    languages: [],
-    modality: "",
-    publishedAt: Date.now(),
-    subs: [],
-    priceRange: {
-      min: 0,
-      max: 0
-    }
+  }, [id]);
 
-  }); */
-
-  // Estado para manejar si el modal está abierto o cerrado
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setPatientToDelete(null);
+  const toggleDropdown = (postulanteId: User) => {
+    setOpenDropdown(openDropdown === postulanteId._id ? null : postulanteId._id);
   };
-  // Estado para manejar si estamos editando un paciente
-  const [isEditing, setIsEditing] = useState(false);
 
-  // Función para eliminar un paciente
-  const handleConfirmDelete = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (patientToDelete) {
-      setLoading(true)
-      try {
-        const response = await fetch(`${API_URL}/delete-patient`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          mode: 'cors',
-          credentials: 'include',
-          body: JSON.stringify({ patientToDelete })
-        });
+  const openConfirmModal = (postulanteId: User, action: "select" | "discard") => {
+    setSelectedPostulante(postulanteId);
+    setSelectedAction(action);
+    setModalOpen(true);
+    setOpenDropdown(null);
+  };
 
-        if (!response.ok) throw new Error('Error al eliminar el paciente');
+  const sendToSupabase = async (p: User) => {
+    setActionLoading(true)
+    const NAMESPACE = '123e4567-e89b-12d3-a456-426614174000'; // Fijo para derivar UUID v5
 
-        setPacientes((prevPacientes) => prevPacientes.filter((p) => p._id !== patientToDelete._id));
+    // Si el user.id es un ObjectId de MongoDB, lo convertimos a string para trabajar con UUID
+   
+    try {
+      const { data, error } = await supabase
+        .from("chats")
+        .insert([{
+          user1: p.sender_mongo_id,  // Usamos sender_mongo_id del postulante
+          user2: user?.sender_mongo_id,          // Usamos el UUID del user autenticado
+          created_at: new Date().toISOString()  // Fecha de creación
+        }]);
+      setTimeout(() => {
+        navigate("/mensajes")
+      }, 2000)
 
-        setShowDeleteModal(false);
-        setPatientToDelete(null);
-      } catch (error) {
-        console.error('Error eliminando el paciente:', error);
+      setActionLoading(false)
+      if (error) {
+        console.error("Error al enviar el mensaje:", error);
+        setErrorMessage("Error al enviar el mensaje.");
+      } else {
+        console.log("Mensaje insertado con éxito:", data);
+        setText("");  // Limpiar el campo de texto después de enviar el mensaje
+        setErrorMessage(null);  // Limpiar mensaje de error si es exitoso
       }
-      finally {
-        setLoading(false)
-        setShowDeleteModal(false);
-        setPatientToDelete(null);
-      }
+    }
+    catch (err) {
+      console.log(err)
+    }
+    finally {
+      setActionLoading(false)
     }
   };
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Desarrollador Frontend",
-      description: "Buscamos un desarrollador con experiencia en React y Tailwind CSS.",
-      modalidad: "Remoto",
-      salario: "$3,000/mes",
-      aplicantes: "15 postulantes",
-      habilidades: ["React", "Tailwind CSS", "JavaScript", "Redux", "Git", "REST API"],
-      enEspera: false,
-    },
-    {
-      id: 2,
-      title: "Diseñador UX/UI",
-      description: "Se necesita un diseñador con habilidades en Figma y prototipado.",
-      modalidad: "Híbrido",
-      salario: "$2,500/mes",
-      aplicantes: "10 postulantes",
-      habilidades: ["Figma", "Adobe XD", "Prototipado", "Investigación UX", "HTML/CSS"],
-      enEspera: true,
-    },
-    {
-      id: 3,
-      title: "Gerente de Producto",
-      description: "Oportunidad para liderar el desarrollo de nuevos productos digitales.",
-      modalidad: "Presencial",
-      salario: "$4,500/mes",
-      aplicantes: "8 postulantes",
-      habilidades: ["Gestión de Producto", "Scrum", "Metodologías Ágiles", "Data Analysis", "Stakeholder Management"],
-      enEspera: true,
-    },
-  ];
+  const confirmAction = async () => {
+    if (!selectedAction || !selectedPostulante) return;
+    console.log(selectedPostulante);
+    setActionLoading(true);
 
-
-
-  // Función para actualizar un paciente
-  
-  /*   const postulantes = [
-      {
-        id: 1,
-        nombre: "Juan Pérez",
-        correo: "juanperez@gmail.com",
-        habilidades: ["React", "Node.js", "Tailwind CSS"],
-        estado: "Pendiente",
-      },
-      {
-        id: 2,
-        nombre: "María López",
-        correo: "marialopez@gmail.com",
-        habilidades: ["Python", "Django", "PostgreSQL"],
-        estado: "Pendiente",
-      },
-      {
-        id: 3,
-        nombre: "Carlos Gómez",
-        correo: "carlosgomez@gmail.com",
-        habilidades: ["Angular", "TypeScript", "MongoDB"],
-        estado: "Pendiente",
-      },
-    ];
-   */
-
+    try {
+      if (selectedAction === "select") {
+        await sendToSupabase(selectedPostulante);
+      } else {
+        console.log(`❌ Postulante descartado: ${selectedPostulante}`);
+      }
+    } catch (error) {
+      console.error("Error en la acción:", error);
+    } finally {
+      setActionLoading(false);
+      setModalOpen(false);
+      setSelectedPostulante(null);
+      setSelectedAction(null);
+    }
+  };
 
   return (
-    <div className='container mx-auto   max-w-7xl text-center'>
+    <div className='container mx-auto max-w-7xl text-center'>
       <Breadcrumb pageName="Postulaciones" number={pacientes.length} />
-      <div className="flex justify-end ">
-        {/*    <h2 className="text-lg font-semibold">Calendario de citas</h2> */}
 
-      </div>
+      {loading ? <p>Cargando postulantes...</p> : null}
+      {error ? <p className="text-red-500">{error}</p> : null}
 
+      <ul className="space-y-4">
+        {pacientes.map((postulante) => (
+          <li key={postulante._id} className="flex items-center justify-between bg-white p-4 rounded border">
+            <div className="flex flex-col text-left">
+              <span className="text-sm sm:text-lg text-gray-500">UY</span>
+              <span className="text-sm sm:text-lg font-semibold">{postulante.name}</span>
+              <span className="text-gray-500">{postulante.email}</span>
+            </div>
 
-      {/* <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5  dark:border-strokedark dark:bg-boxdark">
- */}
+            <div className="relative">
+              <button
+                className="text-gray-600 hover:text-black focus:outline-none"
+                onClick={() => toggleDropdown(postulante)}
+              >
+                <FontAwesomeIcon icon={faEllipsisV} />
+              </button>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg">
-          <thead className="bg-blue-800 text-white">
-            <tr>
-              <th className="py-3 px-6 text-left">Nombre</th>
-              <th className="py-3 px-6 text-left">Correo</th>
-            {/*   <th className="py-3 px-6 text-left">Habilidades</th> */}
-              <th className="py-3 px-6 text-left">Estado</th>
-              <th className="py-3 px-6 text-left">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-             {pacientes.map((postulante, index) => (
-              <tr key={index} className="border-b hover:bg-gray-100 text-left">
-                <td className="py-3 px-6">{postulante.name}</td>
-                <td className="py-3 px-6">{postulante.email}</td>
-               {/*  <td className="py-3 px-6">
-                  <div className="flex flex-wrap gap-2">
-                    {postulante.especialities.map((habilidad, i) => (
-                      <span key={i} className="hover:border-blue-300 border-2 text-gray-800 hover:text-blue-500 cursor-pointer px-2 py-1 text-xs rounded-full">
-                        {habilidad}
-                      </span>
-                    ))}
-                  </div>
-                </td> */}
-               {/*  <td className="py-3 px-6">
-                  <span className={`px-3 py-1 text-xs font-bold rounded-full ${postulante.state === "Aprobado" ? "bg-green-500 text-white" : postulante.state === "Pendiente" ? "bg-yellow-500 text-white" : "bg-red-500 text-white"}`}>
-                    {postulante.state}
-                  </span>
-                </td> */}
-                <td className="py-3 px-6">
-                  <Link to={`/postulantes/${postulante._id}/perfil`} className=" text-gray-500  rounded underline">
-                    Ver perfil
+              {openDropdown === postulante._id && (
+                <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-10">
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
+                    onClick={() => openConfirmModal(postulante, "select")}
+                  >
+                    ✅ Seleccionar
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
+                    onClick={() => openConfirmModal(postulante, "discard")}
+                  >
+                    ❌ Descartar
+                  </button>
+                  <Link
+                    to={`/postulantes/${postulante._id}/perfil`}
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
+                  >
+                    👤 Ver perfil
                   </Link>
-                </td>
-              </tr>
-            ))} 
-          </tbody>
-        </table>
-      </div>
+                </div>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
 
-
-      {/*  </div> */}
-
+      {modalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">
+              {selectedAction === "select" ? "Confirmar selección" : "Confirmar descarte"}
+            </h2>
+            <p className="mb-4">
+              {selectedAction === "select"
+                ? "¿Estás seguro de que quieres seleccionar a este postulante? Se creará un chat para comunicarse."
+                : "¿Estás seguro de que quieres descartar a este postulante?"}
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setModalOpen(false)}
+                disabled={actionLoading}
+              >
+                Cancelar
+              </button>
+              <button
+                className={`px-4 py-2 rounded text-white ${selectedAction === "select" ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}`}
+                onClick={confirmAction}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Procesando..." : "Confirmar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

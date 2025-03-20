@@ -15,21 +15,22 @@ const DropdownMessage = () => {
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <li className="relative">
         <Link
-          onClick={() => {
+        
+       /*    onClick={() => {
             setNotifying(false);
             setDropdownOpen(!dropdownOpen);
-          }}
+          }} */
           className="relative flex h-8.5 w-8.5 items-center justify-center rounded-full border-[0.5px] border-stroke bg-gray hover:text-primary dark:border-strokedark dark:bg-meta-4 dark:text-white"
-          to="#"
+          to="/mensajes"
         >
-          <span
+    {/*       <span
             className={`absolute -top-0.5 -right-0.5 z-1 h-2 w-2 rounded-full bg-meta-1 ${
               notifying === false ? 'hidden' : 'inline'
             }`}
           >
             <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-meta-1 opacity-75"></span>
           </span>
-
+ */}
           <svg
             className="fill-current duration-300 ease-in-out"
             width="18"
@@ -58,7 +59,7 @@ const DropdownMessage = () => {
         </Link>
 
         {/* <!-- Dropdown Start --> */}
-        {dropdownOpen && (
+      {/*   {dropdownOpen && (
           <div
             className={`absolute -right-16 mt-2.5 flex h-90 w-75 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-80`}
           >
@@ -159,7 +160,7 @@ const DropdownMessage = () => {
               </li>
             </ul>
           </div>
-        )}
+        )} */}
         {/* <!-- Dropdown End --> */}
       </li>
     </ClickOutside>

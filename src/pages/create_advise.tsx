@@ -4,6 +4,10 @@ import UserProfileEditForm from './Form/data';
 import { API_LOCAL, API_URL } from '@/hooks/apis';
 import axios from 'axios';
 import CreateAdviseForm from './Form/create_advise';
+interface DeliveryDate {
+  deliveryDate: string
+}
+
 type User = {
   _id: string;
   id?: string;
@@ -15,6 +19,8 @@ type User = {
   especialities: string[],
   time: string,
   subs: string[];
+  fixedPrice: string,
+  endDateProject: DeliveryDate
   languages: string[];
   socialNetworks?: { [key: string]: string }; // Redes sociales como objeto
 };
@@ -24,8 +30,8 @@ const CreateAdvise = () => {
   const [user, setUser] = useState<User | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-  useEffect(() => {
+  const [loading, setLoading] = useState(false);
+/*   useEffect(() => {
 
 
     const getDataInformation = async () => {
@@ -48,8 +54,8 @@ const CreateAdvise = () => {
     }
     getDataInformation();
 
-  }, [])
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, []) */
+/*   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setErrorMessage(null); // Clear error if valid
@@ -71,7 +77,7 @@ const CreateAdvise = () => {
       };
       reader.readAsDataURL(file);
     }
-  };
+  }; */
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,21 +113,21 @@ const CreateAdvise = () => {
       console.error(error);
       alert('Error al subir la imagen');
     }
-    finally{
+    finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex  min-h-screen bg-gray-100">
+    <div className="flex  min-h-screen">
       <div className="container mx-auto   max-w-7xl text-center">
-   {/*    <Breadcrumb pageName="Crear aviso" number={0} />
+        {/*    <Breadcrumb pageName="Crear aviso" number={0} />
  */}
-      <div className="grid gap-8">
-        <CreateAdviseForm user={user} />
-     
+        <div className="grid gap-8">
+          <CreateAdviseForm user={user} />
+
+        </div>
       </div>
-    </div>
     </div>
   );
 };

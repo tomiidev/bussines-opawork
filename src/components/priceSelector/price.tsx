@@ -32,6 +32,7 @@ const PriceRangeSelector: React.FC<PriceRangeSelectorProps> = ({ priceRange, set
   return (
     <div className="p-4">
       <p className="mb-4 font-semibold">Selecciona el rango de precios</p>
+   
       <div className="flex items-center gap-2">
         <label htmlFor="minPrice" className="text-sm font-medium">Precio Mínimo:</label>
         <input
