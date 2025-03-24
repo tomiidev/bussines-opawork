@@ -42,7 +42,7 @@ function App() {
 
     const checkAuth = async () => {
       try {
-        const response = await fetch(`${API_URL}/check-auth`, {
+        const response = await fetch(`${API_LOCAL}/check-auth`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           mode: "cors",
@@ -57,7 +57,7 @@ function App() {
           setIsAuthenticated(false);
 
           // Excluir rutas públicas de la redirección
-          const isPublicRoute =  pathname.startsWith('/auth');
+          const isPublicRoute = pathname.startsWith('/p') || pathname.startsWith('/auth');
           if (!isPublicRoute) {
             navigate('/auth/signin', { replace: true });
           }
@@ -137,7 +137,7 @@ function App() {
               element={
                 <>
                   <PageTitle title="Detalle | MiChamba" />
-                  <CreateAdvise />
+                  <JobDetail />
                 </>
               }
             />
@@ -183,7 +183,7 @@ function App() {
               <ListaPacientes />
             </>} /> */}
             <Route path="/postulantes/:id" element={<>
-              <PageTitle title="Contygo | Pacientes" />
+              <PageTitle title="Opawork | Solicitudes" />
               <ListaPacientes />
             </>} />
             {/*

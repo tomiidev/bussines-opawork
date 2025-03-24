@@ -169,6 +169,27 @@ const UserProfileAppliedForm: React.FC<SharedResourcesProps> = ({ user }) => {
 
           </div>
           <div className="mb-5.5">
+            <label className="block text-sm font-medium py-3">Especialidades</label>
+            <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
+              {user?.subs.map((subs) => {
+                const isSelected = formData.subs.includes(subs);
+                return (
+                  <span
+                    key={subs}
+
+                    className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
+                ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}
+              `}
+                  >
+                    {subs}
+                  </span>
+                );
+              })}
+            </div>
+
+
+          </div>
+          <div className="mb-5.5">
             <label className="block text-sm font-medium py-3">Disponibilidad</label>
             <input
               className="w-full rounded border border-stroke py-3 px-4"

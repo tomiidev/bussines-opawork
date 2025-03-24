@@ -8,7 +8,7 @@ const Breadcrumb = ({ pageName, number }: BreadcrumbProps) => {
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className='flex items-center gap-2'>
 
-        <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+        <h2 className="text-title-md2 font-inter text-black dark:text-white">
           {pageName}
         </h2>
         <span className='text-xl'><strong>{number === 0 ? "" : `(${number})`}</strong></span>

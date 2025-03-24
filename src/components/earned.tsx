@@ -25,7 +25,7 @@ const PlazoRetiros: React.FC = () => {
 const TotalGanado: React.FC<TotalGanadoProps> = ({ totalAmount, onWithdraw }) => {
     return (
         <>
-            <div className="flex flex-col sm:flex-row items-center  justify-between p-4 bg-white text-white rounded-sm shadow mb-5">
+            <div className="flex rounded-xl flex-col sm:flex-row items-center  justify-between p-4 bg-white text-white rounded-sm shadow mb-5">
                 {/* En dispositivos móviles: Total ganado y monto en la misma fila */}
                 <div className="flex items-center text-black  sm:flex-row items-center justify-between sm:space-x-4 w-full mb-4 sm:mb-0">
                     {/* Icono y texto de Total ganado */}

@@ -7,7 +7,6 @@
     @apply font-satoshi font-normal text-base text-body bg-whiten relative z-1;
   }
 }
-
 @layer components {
 }
 /* Spinner básico */
@@ -20,9 +19,11 @@
   border-style: solid;
   border-radius: 50%;
 }
+
 body{
-  background-color: #fbfbfb;
-overflow: hidden;
+  background-color: #f5f5f5;
+/*   background-color: #fbfbfb; */
+overflow-y: hidden;
 }
 @layer utilities {
   /* Chrome, Safari and Opera */

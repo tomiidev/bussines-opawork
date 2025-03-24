@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale'; // Importamos la configuración regional e
 import { API_LOCAL, API_URL } from "@/hooks/apis";
 import { useEffect, useState } from "react";
 import Footer from "@/components/footer";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 interface PriceRange {
   min: number;
   max: number;
@@ -66,22 +67,22 @@ export default function CardsList() {
 
     obtenerPacientes();
   }, []); // Se ejecuta solo una vez al montar el componente
-
+console.log(avisos)
   return (
     <>
       {/* <div className="flex"> */}
-        <div className="container mx-auto   max-w-7xl text-center">
+        <div className="container mx-auto mt-10 pt-10   max-w-7xl text-center">
 
-          <h2 className="text-lg font-semibold text-black  text-left">Mis avisos</h2>
+          <Breadcrumb pageName="Mis avisos" number={0}/>
 
           <div className=" gap-4 mt-5">
             {avisos.map((job, index) => (
-              <div key={index} className=" text-left p-4   border-b hover:bg-gray-100 z-0]">
+              <div key={index} className="rounded-xl text-left overflow-hidden border border-gray-200 p-6 bg-white transition duration-200 mb-3">
                 <span className="text-xs sm:text-sm text-black">
                   Se entrega el {format(parseISO(job.endDateProject.deliveryDate), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
                 </span>
 
-                <h2 className="text-lg sm:text-xl font-roboto mt-2 text-black hover:cursor-pointer hover:underline" onClick={() => nv(`/avisos/${job._id}`)}>{job.title}</h2>
+                <h2 className="font-semibold font-inter text-xl mb-2 text-black cursor-pointer hover:text-blue-800 transition duration-200" onClick={() => nv(`/avisos/${job._id}`)}>{job.title}</h2>
                 <div className="flex justify-start my-2 items-center space-x-4 text-sm text-gray-500">
                   <span className="font-bold text-black">${job.priceRange?.min} - ${job.priceRange?.max}</span>
                   {/*   <span>{job.modalidad}</span>
@@ -96,14 +97,10 @@ export default function CardsList() {
                 <p className="text-gray-600 mt-2 leading-relaxed break-words">{job.description.slice(0, 100)}</p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {job.especialities.map((habilidad, i) => (
-                    <span key={i} className="hover:border-blue-300 border-2 text-gray-800 hover:text-blue-500 cursor-pointer px-2 py-1 text-xs sm:text-sm rounded">{habilidad}</span>
+                    <span key={i} className="nline-block bg-blue-200 text-blue-800 rounded-full px-3 py-1 font-inter text-sm font-semibold mr-2 mb-2">{habilidad}</span>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {job.subs.map((habilidad, i) => (
-                    <span key={i} className="hover:border-blue-300 border-2 text-gray-800 hover:text-blue-500 cursor-pointer px-2 py-1 text-xs sm:text-sm rounded">{habilidad}</span>
-                  ))}
-                </div>
+             
                 <div className="text-right bottom-2 right-2 text-xs text-gray-500">
                   <span>Publicado </span>{formatDistanceToNow(parseISO(job.publishedAt), { addSuffix: true, locale: es })}
                 </div>
@@ -111,8 +108,7 @@ export default function CardsList() {
             ))}
           </div>
         </div>
-     {/*  </div> */}
-      <Footer />
+    
     </>
   );
 }

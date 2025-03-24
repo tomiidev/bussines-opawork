@@ -45,7 +45,7 @@ const SignIn: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/sign_in_with_email`, {
+      const response = await fetch(`${API_LOCAL}/sign_in_with_email`, {
         method: 'POST',
         mode: "cors",
         credentials: 'include', // Enviar cookies HTTP-only automáticamente
@@ -66,15 +66,16 @@ const SignIn: React.FC = () => {
       const result = await response.json();
       console.log('Login successful:', result);
       if (result.user.typeAccount === "u") {
-        window.location.replace("https://auth.opawork.app")
+       /*  window.location.replace("https://auth.opawork.app") */
 
        // Redirige al usuario a la página de inicio o dashboard
        /* navigate('/')  */
-       /* window.location.replace("http://localhost:5174") */
-     }
-     else if (result.user.typeAccount === "b") {
        /* window.location.replace("http://localhost:5173") */
-        window.location.replace("https://negocios.opawork.app")
+      }
+      else if (result.user.typeAccount === "b") {
+        /* window.location.replace("http://localhost:5173") */
+        /* window.location.replace("https://negocios.opawork.app") */
+        window.location.replace("http://localhost:5173")
 
      }
      /*  window.location.href = "http://localhost:5173"; */

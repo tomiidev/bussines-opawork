@@ -7,6 +7,7 @@ import Breadcrumb from '../Breadcrumbs/Breadcrumb';
 import { supabase } from '@/supabase';
 import { v5 as uuidv5 } from 'uuid';
 import { useChat } from '@/context/ctx';
+import ClickOutside from '../ClickOutside';
 
 // Interfaces
 interface User {
@@ -97,13 +98,42 @@ const ListaPacientes: FC = () => {
     setModalOpen(true);
     setOpenDropdown(null);
   };
+  const sendToMongo = async (p: User) => {
+    setActionLoading(true); // Activar el estado de carga
+
+    try {
+      const data = await fetch(`${API_LOCAL}/change status-of-applie`, {
+        method: "POST",
+        body: JSON.stringify({ user: p._id }), // Enviamos los datos como JSON
+        mode: "cors", // Configuramos el CORS
+        credentials: "include", // Incluye cookies si es necesario
+        headers: {
+          'Content-Type': 'application/json', // Indicamos que enviamos JSON
+        },
+      });
+
+      const res = await data.json(); // Parseamos la respuesta en JSON
+
+      if (data.ok) {
+        console.log("Enviado con éxito", res);
+        // Aquí puedes agregar lógica si la respuesta es exitosa
+      } else {
+        console.log("Error en el envío", res);
+        // Aquí puedes manejar casos cuando la respuesta no es exitosa
+      }
+    } catch (err) {
+      console.error("Error al enviar los datos:", err);
+      // Manejo de errores en caso de que falle la solicitud
+    } finally {
+      setActionLoading(false); // Desactivar el estado de carga
+    }
+  };
 
   const sendToSupabase = async (p: User) => {
     setActionLoading(true)
-    const NAMESPACE = '123e4567-e89b-12d3-a456-426614174000'; // Fijo para derivar UUID v5
 
     // Si el user.id es un ObjectId de MongoDB, lo convertimos a string para trabajar con UUID
-   
+
     try {
       const { data, error } = await supabase
         .from("chats")
@@ -142,6 +172,7 @@ const ListaPacientes: FC = () => {
     try {
       if (selectedAction === "select") {
         await sendToSupabase(selectedPostulante);
+        await sendToMongo(selectedPostulante)
       } else {
         console.log(`❌ Postulante descartado: ${selectedPostulante}`);
       }
@@ -156,53 +187,57 @@ const ListaPacientes: FC = () => {
   };
 
   return (
-    <div className='container mx-auto max-w-7xl text-center'>
+    <div className='container mx-auto max-w-7xl text-center mt-10 pt-10'>
       <Breadcrumb pageName="Postulaciones" number={pacientes.length} />
 
-      {loading ? <p>Cargando postulantes...</p> : null}
+      {loading ? <p>Cargando solicitudes...</p> : null}
       {error ? <p className="text-red-500">{error}</p> : null}
 
-      <ul className="space-y-4">
+      <ul className="space-y-4 z-[-1]">
         {pacientes.map((postulante) => (
-          <li key={postulante._id} className="flex items-center justify-between bg-white p-4 rounded border">
-            <div className="flex flex-col text-left">
-              <span className="text-sm sm:text-lg text-gray-500">UY</span>
-              <span className="text-sm sm:text-lg font-semibold">{postulante.name}</span>
-              <span className="text-gray-500">{postulante.email}</span>
-            </div>
+          <ClickOutside onClick={() => setOpenDropdown(null)}>
+            <li key={postulante._id} className="flex mb-3 items-center z-0 justify-between rounded-xl text-left overflow-hidden border border-gray-200 p-6 bg-white transition duration-200 mb-3">
+              <div className="flex flex-col text-left">
+                <span className="text-sm sm:text-lg text-gray-500">UY</span>
+                <span className="text-sm sm:text-lg font-semibold font-inter">{postulante.name}</span>
+                <span className="text-gray-500">{postulante.email}</span>
+              </div>
 
-            <div className="relative">
-              <button
-                className="text-gray-600 hover:text-black focus:outline-none"
-                onClick={() => toggleDropdown(postulante)}
-              >
-                <FontAwesomeIcon icon={faEllipsisV} />
-              </button>
+              <div className="relative">
+                <button
+                  className="text-gray-600 hover:text-black focus:outline-none"
+                  onClick={() => toggleDropdown(postulante)}
+                >
+                  <FontAwesomeIcon icon={faEllipsisV} />
+                </button>
 
-              {openDropdown === postulante._id && (
-                <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-lg z-10">
-                  <button
-                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
-                    onClick={() => openConfirmModal(postulante, "select")}
-                  >
-                    ✅ Seleccionar
-                  </button>
-                  <button
-                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
-                    onClick={() => openConfirmModal(postulante, "discard")}
-                  >
-                    ❌ Descartar
-                  </button>
-                  <Link
-                    to={`/postulantes/${postulante._id}/perfil`}
-                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
-                  >
-                    👤 Ver perfil
-                  </Link>
-                </div>
-              )}
-            </div>
-          </li>
+                {openDropdown === postulante._id && (
+
+
+                  <div className="fixed left-[calc(100%-180px)] sm:left-[calc(100%-400px)] rounded-xl  mt-2 w-36 bg-white border rounded-lg shadow-lg">
+                    <button
+                      className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
+                      onClick={() => openConfirmModal(postulante, "select")}
+                    >
+                      ✅ Seleccionar
+                    </button>
+                    <button
+                      className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
+                      onClick={() => openConfirmModal(postulante, "discard")}
+                    >
+                      ❌ Descartar
+                    </button>
+                    <Link
+                      to={`/postulantes/${postulante._id}/perfil`}
+                      className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
+                    >
+                      👤 Ver perfil
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </li>
+          </ClickOutside>
         ))}
       </ul>
 

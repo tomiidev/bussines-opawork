@@ -1,3 +1,4 @@
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import PaymentMethodMap from "@/components/paymentsMethods/pm";
 import { API_LOCAL } from "@/hooks/apis";
 import React, { useEffect, useState } from "react";
@@ -248,8 +249,9 @@ const UserProfileEditForm: React.FC<SharedResourcesProps> = ({ user }) => {
 
   return (
     <div className="col-span-5 text-left">
-      <div className="rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
-        <div className="p-7">
+          <Breadcrumb pageName="Información personal" number={0} />
+      <div className="rounded-xl border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+        <div className="p-7 ">
           <form onSubmit={handleSubmit}>
             <div className="mb-5.5">
               <label className="block text-sm font-medium py-3">Nombre</label>

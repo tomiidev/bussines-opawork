@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { generalServices } from "@/services";
 import { useNavigate } from "react-router-dom";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 interface PriceRange {
   min: number;
   max: number;
@@ -230,159 +231,164 @@ const CreateAdviseForm: React.FC<SharedResourcesProps> = ({ user }) => {
   };
 
   return (
-    <div className="col-span-5 text-left">
-      <div className="rounded-sm border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
-        <div className="p-7">
-          <form onSubmit={handleSubmit}>
-            <div className="">
-              <label className="block text-sm font-medium py-3">Título</label>
-              <input
-                className="w-full rounded border border-stroke py-3 px-4"
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Título"
-              />
-            </div>
-            <div className="">
-              <label className="block text-sm font-medium py-3">¿Qué necesitas?</label>
-              <textarea
-                className="w-full rounded border border-stroke py-3 px-4"
-                name="description"
-                rows={4}
-                minLength={50}
-                maxLength={300}
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Descripción del proyecto"
-              ></textarea>
-            </div>
+    <div className="flex  min-h-screen mt-10 pt-10">
+      <div className="container mx-auto   max-w-7xl text-center">
+      <Breadcrumb pageName="Crear aviso" number={0} />
+        <div className="col-span-5 text-left ">
+          <div className="rounded-xl border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+            <div className="p-7">
+              <form onSubmit={handleSubmit}>
+                <div className="">
+                  <label className="block text-sm font-medium py-3">Título</label>
+                  <input
+                    className="w-full rounded border border-stroke py-3 px-4"
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Título"
+                  />
+                </div>
+                <div className="">
+                  <label className="block text-sm font-medium py-3">¿Qué necesitas?</label>
+                  <textarea
+                    className="w-full rounded border border-stroke py-3 px-4"
+                    name="description"
+                    rows={4}
+                    minLength={50}
+                    maxLength={300}
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Descripción del proyecto"
+                  ></textarea>
+                </div>
 
-            <div className="">
-              <label className="block text-sm font-medium py-3">Idiomas</label>
-              <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
-                {languages.map((lan) => {
-                  const isSelected = formData.languages.includes(lan);
-                  return (
-                    <span
-                      key={lan}
-                      onClick={() => toogleLeng(lan)}
-                      className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
+                <div className="">
+                  <label className="block text-sm font-medium py-3">Idiomas</label>
+                  <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
+                    {languages.map((lan) => {
+                      const isSelected = formData.languages.includes(lan);
+                      return (
+                        <span
+                          key={lan}
+                          onClick={() => toogleLeng(lan)}
+                          className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
                 ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}
               `}
-                    >
-                      {lan}
-                    </span>
-                  );
-                })}
-              </div>
+                        >
+                          {lan}
+                        </span>
+                      );
+                    })}
+                  </div>
 
 
-            </div>
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Especialidades</label>
-              <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
-                {Object.keys(generalServices).map((categoria) => {
-                  const isSelected = formData.especialities.includes(categoria);
-                  return (
-                    <span
-                      key={categoria}
-                      onClick={() => toggleEspecialidad(categoria)}
-                      className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
+                </div>
+                <div className="mb-5.5">
+                  <label className="block text-sm font-medium py-3">Especialidades</label>
+                  <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
+                    {Object.keys(generalServices).map((categoria) => {
+                      const isSelected = formData.especialities.includes(categoria);
+                      return (
+                        <span
+                          key={categoria}
+                          onClick={() => toggleEspecialidad(categoria)}
+                          className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all 
           ${isSelected ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
-                    >
-                      {categoria}
-                    </span>
-                  );
-                })}
-              </div>
+                        >
+                          {categoria}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+                {formData.especialities.length > 0 && (
+                  <div className="my-5.5">
+                    <h3>Subespecialidades</h3>
+                    {formData.especialities.map((categoria: string) => {
+                      const subespecialidades = generalServices[categoria];
+                      return (
+                        <div key={categoria} className="my-5">
+
+                          <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
+                            {/* Mapear las subespecialidades */}
+                            {subespecialidades.map((sub: string) => {
+                              const isSubSelected = formData.subs.includes(sub);
+                              return (
+                                <span
+                                  key={sub}
+                                  onClick={() => toggleSubs(sub)}
+                                  className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all ${isSubSelected ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                    }`}
+                                >
+                                  {sub}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="mb-5.5">
+                  <label className="block text-sm font-medium py-3">Disponibilidad de tiempo</label>
+                  <select
+                    name="time"
+                    value={formData.time}
+                    onChange={handleChange}
+                    className="w-full rounded border border-stroke py-3 px-4"
+                  >
+                    <option value="">Selecciona una modalidad</option>
+                    <option value="Tiempo completo">Tiempo completo</option>
+                    <option value="Medio tiempo">Medio tiempo</option>
+                    <option value="Fines de semana">Fines de semana</option>
+
+                  </select>
+
+                </div>
+                <div className="mb-5.5">
+                  <label className="block text-sm font-medium py-3">Precio negociable</label>
+                  <select
+                    name="fixedPrice"
+                    value={formData.fixedPrice}
+                    onChange={handleChange}
+                    className="w-full rounded border border-stroke py-3 px-4"
+                  >
+                    <option value="">Selecciona</option>
+                    <option value="si">Sí</option>
+                    <option value="no">No</option>
+
+
+                  </select>
+
+                </div>
+                <div className="mb-5.5">
+                  <DateSelector deliveryDate={deliveryDate} setDeliveryDate={setDeliveryDate} formData={formData} setFormData={setFormData} />
+                  <p className="mb-4 text-gray-500">Para inidicar un presupuesto exacto se debe situar en el mismo valor ambos inputs.</p>
+                  <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData} />
+                </div>
+
+
+                <div className="flex justify-end">
+                  <button
+                    className="bg-blue-500 text-white py-2 px-6 rounded hover:bg-opacity-90"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    {loading ? "Publicando..." : "Publicar aviso"}
+                  </button>
+                </div>
+              </form>
             </div>
-            {formData.especialities.length > 0 && (
-              <div className="my-5.5">
-                <h3>Subespecialidades</h3>
-                {formData.especialities.map((categoria: string) => {
-                  const subespecialidades = generalServices[categoria];
-                  return (
-                    <div key={categoria} className="my-5">
-
-                      <div className="border border-stroke p-3 rounded-lg max-h-40 overflow-auto flex flex-wrap gap-2">
-                        {/* Mapear las subespecialidades */}
-                        {subespecialidades.map((sub: string) => {
-                          const isSubSelected = formData.subs.includes(sub);
-                          return (
-                            <span
-                              key={sub}
-                              onClick={() => toggleSubs(sub)}
-                              className={`cursor-pointer px-3 py-1 rounded-full text-sm flex items-center transition-all ${isSubSelected ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
-                            >
-                              {sub}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Disponibilidad de tiempo</label>
-              <select
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full rounded border border-stroke py-3 px-4"
-              >
-                <option value="">Selecciona una modalidad</option>
-                <option value="Tiempo completo">Tiempo completo</option>
-                <option value="Medio tiempo">Medio tiempo</option>
-                <option value="Fines de semana">Fines de semana</option>
-
-              </select>
-
-            </div>
-            <div className="mb-5.5">
-              <label className="block text-sm font-medium py-3">Precio negociable</label>
-              <select
-                name="fixedPrice"
-                value={formData.fixedPrice}
-                onChange={handleChange}
-                className="w-full rounded border border-stroke py-3 px-4"
-              >
-                <option value="">Selecciona</option>
-                <option value="si">Sí</option>
-                <option value="no">No</option>
-
-
-              </select>
-
-            </div>
-            <div className="mb-5.5">
-              <DateSelector deliveryDate={deliveryDate} setDeliveryDate={setDeliveryDate} formData={formData} setFormData={setFormData} />
-              <p className="mb-4 text-gray-500">Para inidicar un presupuesto exacto se debe situar en el mismo valor ambos inputs.</p>
-              <PriceRangeSelector priceRange={priceRange} setPriceRange={setPriceRange} formData={formData} setFormData={setFormData} />
-            </div>
-
-
-            <div className="flex justify-end">
-              <button
-                className="bg-blue-500 text-white py-2 px-6 rounded hover:bg-opacity-90"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? "Publicando..." : "Publicar aviso"}
-              </button>
-            </div>
-          </form>
+          </div>
+          <Toaster toastOptions={{
+            duration: 3000,
+            position: "bottom-center"
+          }} />
         </div>
       </div>
-      <Toaster toastOptions={{
-        duration: 3000,
-        position: "bottom-center"
-      }} />
     </div>
   );
 };

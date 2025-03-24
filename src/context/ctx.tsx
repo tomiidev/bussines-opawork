@@ -35,7 +35,7 @@ interface Chat {
   user2: string;
   name_one: string;
   name_two: string;
-  created_at: Date;
+  created_at: string;
   messages: Message[]; // Almacenamos los mensajes relacionados con este chat
 }
 
@@ -43,9 +43,9 @@ interface ChatContextType {
   chats: Chat[];
   chat: Chat | null;
   activeChat: Chat | null;
-  titleAdvise: string | null;
   user: User | null;
-  receiver: User | undefined;
+  titleAdvise: string | null;
+  receiver: User| undefined;
   receivers: User[];
   messages: Message[] | null;
   setUser: (user: User) => void;
@@ -75,10 +75,9 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
 
     const checkAuth = async () => {
       try {
-        const response = await axios.get(`${API_LOCAL}/check-auth`, { withCredentials: true });
+        const response = await axios.get(`${API_URL}/check-auth`, { withCredentials: true });
 
         if (response.status === 200) {
-          console.log(response)
           const userData = response.data.user;
           setUser(userData);
         } else {
@@ -210,9 +209,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
           credentials: "include"
         });
         const data = await response.json();
-        if (data) {
-          setReceivers(data.data);
-        }
+        setReceivers(data.data || "Usuario desconocido");
         console.log(data.data)
       } catch (error) {
         console.error("Error obteniendo el nombre del receptor:", error);
@@ -227,8 +224,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
       const receiverId = getReceiverId();
 
       if (!receiverId) return;
-      console.log(receiverId);
-
+      console.log(receiverId)
       try {
         const response = await fetch(`${API_URL}/messages/${receiverId}`, {
           method: "GET",
@@ -236,19 +232,19 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
             'Content-Type': 'application/json',
           },
           mode: "cors",
-          credentials: "include",
+          credentials: "include"
         });
-
         const data = await response.json();
-        console.log(data);
+        console.log(data)
         setReceiver(data.data || "Usuario desconocido");
       } catch (error) {
         console.error("Error obteniendo el nombre del receptor:", error);
+
       }
     };
 
     fetchReceiverName();
-  }, [chat]); // Esta dependencia debería estar solo en `chat`, ya que cuando cambia el chat es cuando necesitas obtener un nuevo receptor
+  }, [chat]);
   
   // Este useEffect se activará cuando `receiver` cambie y solo hará la petición de `title` si `receiver` no es nulo
   useEffect(() => {
@@ -257,7 +253,7 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
     }
   }, [chats,receivers, receiver]); // Aquí estamos pendientes del cambio de `receiver`
   const fetchTitleOfAdvise = async () => {
-    
+
     
     console.log(receiver)
     try {
@@ -270,17 +266,15 @@ export const ChatProviderSupabase = ({ children }: { children: ReactNode }) => {
         credentials: "include",
       });
       const data = await response.json();
-      setTitleAdvise(data.data || "Titulo no procesado.");
+      setTitleAdvise(data.data.d || "Titulo no procesado.");
     } catch (error) {
       console.error("Error obteniendo el nombre del receptor:", error);
     }
   };
 
-
-
   return (
     <ChatContext.Provider value={{
-      chat, chats, activeChat, setActiveChat, user, setUser, setChats, receiver, messages, setMessages, receivers, setReceivers, setChat, titleAdvise
+      chat, chats, activeChat, setActiveChat, user, setUser, setChats, receiver, messages, setMessages, receivers,titleAdvise, setReceivers, setChat,
     }}>
       {children}
     </ChatContext.Provider>

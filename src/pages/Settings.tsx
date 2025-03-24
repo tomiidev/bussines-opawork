@@ -129,10 +129,10 @@ const Settings = () => {
   }
 
   return (
-    <div className="flex  min-h-screen">
+    <div className="flex  min-h-screen mt-10 pt-10">
       <div className="container mx-auto   max-w-7xl text-center">
         <TotalGanado totalAmount={121} onWithdraw={onWithdraw} />
-        <Breadcrumb pageName="Información personal" number={0} />
+       
 
         <div className="grid gap-8">
           <UserProfileEditForm user={user} />
