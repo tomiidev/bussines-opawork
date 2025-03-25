@@ -1,4 +1,4 @@
-import { API_LOCAL } from '@/hooks/apis';
+import { API_LOCAL, API_URL } from '@/hooks/apis';
 import { FC, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -102,7 +102,7 @@ const ListaPacientes: FC = () => {
     setActionLoading(true); // Activar el estado de carga
 
     try {
-      const data = await fetch(`${API_LOCAL}/change status-of-applie`, {
+      const data = await fetch(`${API_URL}/change status-of-applie`, {
         method: "POST",
         body: JSON.stringify({ user: p._id }), // Enviamos los datos como JSON
         mode: "cors", // Configuramos el CORS
