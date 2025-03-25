@@ -104,7 +104,7 @@ const ListaPacientes: FC = () => {
     try {
       const data = await fetch(`${API_URL}/change-status-of-applie`, {
         method: "POST",
-        body: JSON.stringify({ user: p._id }), // Enviamos los datos como JSON
+        body: JSON.stringify({ user: p._id, adviseId: id }), // Enviamos los datos como JSON
         mode: "cors", // Configuramos el CORS
         credentials: "include", // Incluye cookies si es necesario
         headers: {
