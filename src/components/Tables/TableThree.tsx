@@ -62,7 +62,7 @@ const ListaPacientes: FC = () => {
   useEffect(() => {
     const obtenerPacientes = async () => {
       try {
-        const response = await fetch(`${API_LOCAL}/get-applies-of-offer/${id}`, {
+        const response = await fetch(`${API_URL}/get-applies-of-offer/${id}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           mode: "cors",
