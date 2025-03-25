@@ -102,7 +102,7 @@ const ListaPacientes: FC = () => {
     setActionLoading(true); // Activar el estado de carga
 
     try {
-      const data = await fetch(`${API_URL}/change status-of-applie`, {
+      const data = await fetch(`${API_URL}/change-status-of-applie`, {
         method: "POST",
         body: JSON.stringify({ user: p._id }), // Enviamos los datos como JSON
         mode: "cors", // Configuramos el CORS
